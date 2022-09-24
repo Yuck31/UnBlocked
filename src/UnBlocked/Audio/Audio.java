@@ -33,7 +33,7 @@ public class Audio
         if(loaded){return;}
 
         //Load UI Sounds.
-        load(new File(soundsPath + "Global/UI"), global_UI, "");
+        //load(new File(soundsPath + "Global/UI"), global_UI, "");
 
         //NEVER make this function work again.
         loaded = true;

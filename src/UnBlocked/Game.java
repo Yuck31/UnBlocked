@@ -40,7 +40,7 @@ public class Game
     private Thread updateThread, renderThread;
 
     //Screen Size stuff.
-    public static final int ASPECT_WIDTH = 16, ASPECT_HEIGHT = 9,
+    public static final int ASPECT_WIDTH = 16, ASPECT_HEIGHT = 10,
     SCREEN_WIDTH = 640, SCREEN_HEIGHT = (SCREEN_WIDTH / ASPECT_WIDTH) * ASPECT_HEIGHT;
 
     //Game Title to put on the Window.

@@ -33,6 +33,7 @@ public class MainMenuState extends GameState
 
     public void start()
     {
+        /*
         test = Sprites.global_UISheet("READY_BOMB");
         select0 = Audio.global_UISound("Select0");
         select1 = Audio.global_UISound("Select1");
@@ -50,6 +51,7 @@ public class MainMenuState extends GameState
         )
         .addComponent(new TextBox(300, 150, 100, 20, Fonts.get("Arial"), Controller.TYPING_LETTER,
         1.0f, new Vector4f(0.2f, 0.2f, 0.2f, 1.0f), Screen.DEFAULT_BLEND));
+        */
     }
 
     public void end(){source.delete();}

@@ -766,6 +766,7 @@ public class OpenGLScreen extends Screen
 
         //Create Basic_SpriteBatch ArrayLists.
         basic_Batches = new ArrayList<Basic_SpriteBatch>();
+        basic2D_Batches = new ArrayList<Basic_SpriteBatch>();
 
 
 

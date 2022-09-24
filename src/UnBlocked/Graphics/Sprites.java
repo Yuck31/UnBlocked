@@ -159,17 +159,17 @@ public class Sprites
         if(loaded){return;}
 
         //Load Debug Sprites.
-        load(new File(imagesPath + "Global/Debug"), global_Debug, "");
+        //load(new File(imagesPath + "Global/Debug"), global_Debug, "");
 
         //Load UI.
-        load(new File(imagesPath + "Global/UI"), global_UI, "");
+        //load(new File(imagesPath + "Global/UI"), global_UI, "");
 
         //Load Entities.
-        load(new File(imagesPath + "Global/Entities"), global_Entities, "");
+        //load(new File(imagesPath + "Global/Entities"), global_Entities, "");
 
         //Load Fonts (since Fonts use SpriteSheets, their sheets need to be stored here and be treated as textures too).
-        load(new File(imagesPath + "Global/Fonts"), global_Fonts, "");
-        Fonts.load(global_Fonts.values(), global_Fonts.keys());
+        //load(new File(imagesPath + "Global/Fonts"), global_Fonts, "");
+        //Fonts.load(global_Fonts.values(), global_Fonts.keys());
 
         //NEVER make this function work again.
         loaded = true;
