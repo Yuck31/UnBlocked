@@ -3,7 +3,7 @@ package UnBlocked.Graphics;
  * This is a version of the base Screen class that utilizes OpenGL 3.3 to render the game.
  * 
  * Author: Luke Sullivan
- * Last Edit: 8/23/2022
+ * Last Edit: 9/24/2022
  */
 import java.io.File;
 import java.util.ArrayList;
@@ -722,9 +722,6 @@ public class OpenGLScreen extends Screen
         -1.0f, 1.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, 0.0f, 0.0f
     };
-
-    private int lightingShader_uOffsets,
-    lightingShader_globalLight;
 
     /**Initialization functions.*/
     public void init()
