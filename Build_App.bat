@@ -1,2 +1,3 @@
-jar cf UnBlock.jar bin/app.class
+jar cvfm Output.jar manifest.mf -C bin UnBlocked
+:jar ?
 pause
