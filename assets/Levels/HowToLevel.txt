@@ -1,0 +1,7 @@
+0-7=background0-background7
+8-15=playground0-playground7
+16=player
+17=block (17-23?)
+24-31=liquid (of diffrent colors)
+32-39=boat (of different designs)
+40-47=telporters (of different bindings and colors)
