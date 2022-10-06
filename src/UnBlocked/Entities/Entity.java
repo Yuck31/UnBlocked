@@ -12,5 +12,5 @@ public abstract class Entity
     /**Constructor.*/
     public Entity(int x, int y){position.set(x, y);}
 
-    public void update(){}
+    public void update(float timeMod){}
 }
