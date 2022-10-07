@@ -64,6 +64,11 @@ public class Player extends Entity
     private int input_commandIndex = 0, current_commandIndex = input_commandIndex;
     private byte[] commandBuffer = new byte[128];
 
+    //Action related stuff.
+    private boolean inAnAction = false;
+    private int idleTimer = 0;
+    //public static final int MAX_BLINK_TIME 
+
     /**Constructor.*/
     public Player(int x, int y)
     {
@@ -201,7 +206,7 @@ public class Player extends Entity
         //
         //Idle
         //
-        //if()
+        if(!inAnAction)
         {
             //If there is a command queued up...
             byte currentCommand = commandBuffer[current_commandIndex];
@@ -225,13 +230,21 @@ public class Player extends Entity
                     case CMD_USE:
                     break;
                 }
+
+                //Increment Command Index.
+                current_commandIndex = (current_commandIndex+1) % commandBuffer.length;
+            }
+
+            //Otherwise, Idle animations.
+            else
+            {
+
             }
         }
+
         //
         //Running Commands.
         //
-
-        
     }
 
     /**Adds a command to the command buffer.*/

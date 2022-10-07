@@ -2,7 +2,10 @@
 8-15=playground0-playground7
 16=player
 17=block (17-23?)
-24-31=liquid (of diffrent colors)
+24-31=water (of diffrent colors)
 32-39=boat (of different designs)
-
 40-47=telporters (of different bindings and colors)
+48-55=switches (of different bindings and colors)
+56-63=horizontalGates (of different bindings and colors)
+64-71=verticalGates (of different bindings and colors)
+72-79=elevators (of different designs)
