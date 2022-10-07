@@ -338,7 +338,10 @@ public class Controller
         return false;
     }
 
+    //Control sstick deadZone.
     private float deadZone = 0.3f;
+    public float getDeadZone(){return deadZone;}
+
      /**
       * Returns -1.0f to 1.0f values of either Control Sticks or Triggers of the given controller.
       *
@@ -441,25 +444,25 @@ public class Controller
                 case menu_UP:
                 dPad = buttonHeld(playerNum, button);
                 axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_Y);
-                if(axes < -0.3f || dPad){return true;}
+                if(axes < -deadZone || dPad){return true;}
                 break;
 
                 case menu_DOWN:
                 dPad = buttonHeld(playerNum, button);
                 axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_Y);
-                if(axes > 0.3f || dPad){return true;}
+                if(axes > deadZone || dPad){return true;}
                 break;
 
                 case menu_LEFT:
                 dPad = buttonHeld(playerNum, button);
                 axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_X);
-                if(axes < -0.3f || dPad){return true;}
+                if(axes < -deadZone || dPad){return true;}
                 break;
 
                 case menu_RIGHT:
                 dPad = buttonHeld(playerNum, button);
                 axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_X);
-                if(axes > 0.3f || dPad){return true;}
+                if(axes > deadZone || dPad){return true;}
                 break;
 
                 default: return buttonHeld(playerNum, button);

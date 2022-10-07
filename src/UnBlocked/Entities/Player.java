@@ -54,6 +54,16 @@ public class Player extends Entity
     anim_zipLine0,
     anim_zipLine1;
 
+    //Command Buffer.
+    public static final byte
+    CMD_LEFT = 1,
+    CMD_RIGHT = 2,
+    CMD_CLIMB = 3,
+    CMD_PICKUP = 4,
+    CMD_USE = 5;
+    private int input_commandIndex = 0, current_commandIndex = input_commandIndex;
+    private byte[] commandBuffer = new byte[128];
+
     /**Constructor.*/
     public Player(int x, int y)
     {
@@ -68,7 +78,7 @@ public class Player extends Entity
         (
             "Player/player_backWalk", playerSprites,
             //
-            (timeMod) -> {return;}
+            this::doNothing, this::backStep
         );
         //
         anim_climb0 = Functional_FrameAnimation.load
@@ -168,68 +178,127 @@ public class Player extends Entity
     /**Update function.*/
     public void update(float timeMod)
     {
+        //
+        //Get input and add it to queue.
+        //
+        byte cmd = 0;
 
+        //Vertical Input.
+        if(input_Vertical <= -1){cmd = CMD_CLIMB; input_Vertical = 0;}
+        else if(input_Vertical >= 1){cmd = CMD_PICKUP; input_Vertical = 0;}
+        addCommand(cmd);
+        
+        //Horizontal Input.
+        if(input_Horizontal <= -1){cmd = CMD_LEFT; input_Horizontal = 0;}
+        else if(input_Horizontal >= 1){cmd = CMD_RIGHT; input_Horizontal = 0;}
+        addCommand(cmd);
+
+        //Use input.
+        if(input_Use){cmd = CMD_USE;}
+        addCommand(cmd);
+
+
+        //
+        //Idle
+        //
+        //if()
+        {
+            //If there is a command queued up...
+            byte currentCommand = commandBuffer[current_commandIndex];
+            if(currentCommand != 0)
+            {
+                //Run it.
+                switch(currentCommand)
+                {
+                    case CMD_LEFT:
+                    break;
+
+                    case CMD_RIGHT:
+                    break;
+
+                    case CMD_CLIMB:
+                    break;
+
+                    case CMD_PICKUP:
+                    break;
+
+                    case CMD_USE:
+                    break;
+                }
+            }
+        }
+        //
+        //Running Commands.
+        //
+
+        
+    }
+
+    /**Adds a command to the command buffer.*/
+    private void addCommand(byte cmd)
+    {
+        if(cmd != 0)
+        {
+            commandBuffer[input_commandIndex] = cmd;
+            input_commandIndex = (input_commandIndex+1) % commandBuffer.length;
+        } 
     }
 
     //Inputs.
-    private float input_xAxes = 0.0f, input_yAxes = 0.0f;
+    private byte input_Horizontal = 0, input_Vertical = 0;
+    private boolean stickX = false, stickY = false;
+    private boolean input_Use = false;
 
     /**Function for getting input.*/
     private void getInput()
     {
         //Movement
-        boolean l = controller.inputHeld(0, Controller.action_LEFT),
-        r = controller.inputHeld(0, Controller.action_RIGHT),
-        u = controller.inputHeld(0, Controller.action_UP),
-        d = controller.inputHeld(0, Controller.action_DOWN);
+        boolean l = controller.inputPressed(0, Controller.action_LEFT),
+        r = controller.inputPressed(0, Controller.action_RIGHT),
+        u = controller.inputPressed(0, Controller.action_UP),
+        d = controller.inputPressed(0, Controller.action_DOWN);
 
         //If D-Pad isn't being used, use control stick instead.
         if(!l && !r && !u && !d)
         {
-            input_xAxes = controller.getAxes(0, GLFW_GAMEPAD_AXIS_LEFT_X);
-            input_yAxes = controller.getAxes(0, GLFW_GAMEPAD_AXIS_LEFT_Y);
+            float stick_xAxes = controller.getAxes(0, GLFW_GAMEPAD_AXIS_LEFT_X);
+            if(!stickX)
+            {
+                if(stick_xAxes < -controller.getDeadZone()){input_Horizontal = -1; stickX = true;}
+                else if(stick_xAxes > controller.getDeadZone()){input_Horizontal = 1; stickX = true;}
+            }
+            else if(stick_xAxes >= -controller.getDeadZone() && stick_xAxes <= controller.getDeadZone()){stickX = false;}
+            //
+            float stick_yAxes = controller.getAxes(0, GLFW_GAMEPAD_AXIS_LEFT_Y);
+            if(!stickY)
+            {
+                if(stick_yAxes < -controller.getDeadZone()){input_Vertical = -1; stickY = true;}
+                else if(stick_yAxes > controller.getDeadZone()){input_Vertical = 1; stickY = true;}
+            }
+            else if(stick_yAxes >= -controller.getDeadZone() && stick_yAxes <= controller.getDeadZone()){stickY = false;}
         }
         else 
         {
             //Horizontal
-            if(l && !r){input_xAxes = -1.0f;}
-            else if(!l && r){input_xAxes = 1.0f;}
-            else{input_xAxes = 0.0f;}
+            if(l && !r){input_Horizontal = -1;}
+            else if(!l && r){input_Horizontal = 1;}
+            else{input_Horizontal = 0;}
 
-            //Vertical and movement accuracy (sorry, no fast diagonals here)
-            if(u && !d)
-            {
-                if(input_xAxes < 0.0f)
-                {
-                    //input_xAxes = -CollisionObject.DIAGONAL_AXES;
-                    //input_yAxes = -CollisionObject.DIAGONAL_AXES;
-                }
-                else if(input_xAxes > 0.0f)
-                {
-                    //input_xAxes = CollisionObject.DIAGONAL_AXES;
-                    //input_yAxes = -CollisionObject.DIAGONAL_AXES;
-                }
-                else{input_yAxes = -1.0f;}
-            }
-            else if(!u && d)
-            {
-                if(input_xAxes < 0.0f)
-                {
-                    //input_xAxes = -CollisionObject.DIAGONAL_AXES;
-                    //input_yAxes = CollisionObject.DIAGONAL_AXES;
-                }
-                else if(input_xAxes > 0.0f)
-                {
-                    //input_xAxes = CollisionObject.DIAGONAL_AXES;
-                    //input_yAxes = CollisionObject.DIAGONAL_AXES;
-                }
-                else{input_yAxes = 1.0f;}
-            }
-            else{input_yAxes = 0.0f;}
+            //Vertical
+            if(u && !d){input_Vertical = -1;}
+            else if(!u && d){input_Vertical = 1;}
+            else{input_Vertical = 0;}
         }
+
+        input_Use = controller.inputPressed(0, Controller.action_USE);
     }
 
     public void doNothing(float timeMod){return;}
+
+    public void backStep(float timeMod)
+    {
+
+    }
 
     public void idle(float timeMod)
     {
