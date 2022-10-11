@@ -9,12 +9,14 @@ import org.joml.Vector4f;
 
 import UnBlocked.Controller;
 import UnBlocked.Game;
+import UnBlocked.TileRenderable;
+import UnBlocked.Graphics.Screen;
 import UnBlocked.Graphics.Sprite;
 import UnBlocked.Graphics.SpriteSheet;
 import UnBlocked.Graphics.Sprites;
 import UnBlocked.Graphics.Animations.Functional_FrameAnimation;
 
-public class Player extends Entity
+public class Player extends Entity implements TileRenderable
 {
     //Controller Reference.
     private transient Controller controller = Game.controller;
@@ -321,5 +323,13 @@ public class Player extends Entity
     public void idle_breathe(float timeMod)
     {
 
+    }
+
+
+    @Override
+    public void render(Screen screen, int x, int y, float scale)
+    {
+        //screen.render
+        
     }
 }

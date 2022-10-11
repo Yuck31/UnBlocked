@@ -27,6 +27,12 @@ public class AAB_Box2D extends Shape2D
     public int getWidth(){return width;}
     public int getHeight(){return height;}
 
+    public void setDimensions(int width, int height)
+    {
+        this.width = width;
+        this.height = height;
+    }
+
     public int left(){return xOffset;}
     public int right(){return xOffset + width;}
     public int back(){return yOffset + height;}

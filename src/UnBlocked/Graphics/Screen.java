@@ -64,35 +64,26 @@ public abstract class Screen
      */
 
     //Camera Offsets
-    protected int xOffset = 0, yOffset = 0, zOffset = 0;
+    protected int xOffset = 0, yOffset = 0;
     protected float scaleOffset = 1.0f;
 
     public final int getXOffset(){return xOffset;}
     public final int getYOffset(){return yOffset;}
-    public final int getZOffset(){return zOffset;}
     public final float getScaleOffset(){return scaleOffset;}
 
     public final void setXOffset(int xOffset){this.xOffset = xOffset;}
     public final void setYOffset(int yOffset){this.yOffset = yOffset;}
-    public final void setZOffset(int zOffset)
-    {
-        //this.zOffset = zOffset;
-        this.zOffset = (zOffset % 2 != 0) ? zOffset-1 : zOffset;
-    }
+
     public final void setScaleOffset(float scaleOffset){this.scaleOffset = scaleOffset;}
-    public final void setCameraOffsets(int xOffset, int yOffset, int zOffset)
+    public final void setCameraOffsets(int xOffset, int yOffset)
     {
         this.xOffset = xOffset;
         this.yOffset = yOffset;
-        //this.zOffset = zOffset;
-        this.zOffset = (zOffset % 2 != 0) ? zOffset-1 : zOffset;
     }
-    public final void setCameraOffsets(int xOffset, int yOffset, int zOffset, float scaleOffset)
+    public final void setCameraOffsets(int xOffset, int yOffset, float scaleOffset)
     {
         this.xOffset = xOffset;
         this.yOffset = yOffset;
-        //this.zOffset = zOffset;
-        this.zOffset = (zOffset % 2 != 0) ? zOffset-1 : zOffset;
         this.scaleOffset = scaleOffset;
     }
 

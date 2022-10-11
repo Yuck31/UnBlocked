@@ -793,7 +793,7 @@ public class OpenGLScreen extends Screen
     public void render(long windowAddress)
     {
         //Calculate View Matrix.
-        projectionMatrix.translate(-xOffset, -yOffset + (zOffset/2), -zOffset, viewMatrix);
+        projectionMatrix.translate(-xOffset, -yOffset, 1, viewMatrix);
         viewMatrix.get(matrixArray);
 
         //Use custom FrameBuffer and set viewport to fixed size.

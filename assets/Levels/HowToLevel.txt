@@ -9,3 +9,4 @@
 56-63=horizontalGates (of different bindings and colors)
 64-71=verticalGates (of different bindings and colors)
 72-79=elevators (of different designs)
+80-87=zipLines (of different designs)
