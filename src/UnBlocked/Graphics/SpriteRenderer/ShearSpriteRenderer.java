@@ -3,7 +3,7 @@ package UnBlocked.Graphics.SpriteRenderer;
  * Author: Luke Sullivan
  * Last Edit: 8/11/2022
  */
-import org.joml.Vector3f;
+import org.joml.Vector2f;
 
 import UnBlocked.Graphics.Screen;
 import UnBlocked.Graphics.Sprite;
@@ -14,14 +14,13 @@ public class ShearSpriteRenderer extends SpriteRenderer
     public interface RenderFunction{public abstract void invoke(Screen screen, float x, float y, float z);}
     public RenderFunction renderFunction = null;
 
-    private float xShear = 0.0f, yShear = 0.0f,
-    zxShear = 0.0f, zyShear = 0.0f;
+    private float xShear = 0.0f, yShear = 0.0f;
 
     /**Constructor.*/
-    public ShearSpriteRenderer(Sprite sprite, int xOffset, int yOffset, int zOffset, boolean fixed, boolean canColorBlend)
+    public ShearSpriteRenderer(Sprite sprite, int xOffset, int yOffset, boolean fixed, boolean canColorBlend)
     {
         this.sprite = sprite;
-        this.offset.set(xOffset, yOffset, zOffset);
+        this.offset.set(xOffset, yOffset);
         this.fixed = fixed;
         //
         if(canColorBlend){renderFunction = this::renderBlend_Sh;}
@@ -30,7 +29,7 @@ public class ShearSpriteRenderer extends SpriteRenderer
 
     /**Default Constructor.*/
     public ShearSpriteRenderer(Sprite sprite, boolean fixed, boolean canColorBlend)
-    {this(sprite, -(sprite.getWidth()/2), -(sprite.getHeight()/2), 0, fixed, canColorBlend);}
+    {this(sprite, -(sprite.getWidth()/2), -(sprite.getHeight()/2), fixed, canColorBlend);}
 
     public float getXShear(){return xShear;}
     public void setXShear(float xShear){this.xShear = xShear;}
@@ -38,25 +37,11 @@ public class ShearSpriteRenderer extends SpriteRenderer
     public float getYShear(){return yShear;}
     public void setYShear(float yShear){this.yShear = yShear;}
 
-    public float getZXShear(){return zxShear;}
-    public void setZXShear(float zxShear){this.zxShear = zxShear;}
-
-    public float getZYShear(){return zyShear;}
-    public void setZYShear(float zyShear){this.zyShear = zyShear;}
-
 
     public void setShear(float xShear, float yShear)
     {
         this.xShear = xShear;
         this.yShear = yShear;
-    }
-
-    public void setShear(float xShear, float yShear, float zxShear, float zyShear)
-    {
-        this.xShear = xShear;
-        this.yShear = yShear;
-        this.zxShear = zxShear;
-        this.zyShear = zyShear;
     }
 
     private float sx = 0;
@@ -68,7 +53,7 @@ public class ShearSpriteRenderer extends SpriteRenderer
         (
             (int)(x + offset.x),
             (int)(y + offset.y),
-            (int)(z + offset.z),
+            (int)(z),
             //(int)((z + offset.z + (sprite.getHeight() * 2))),
             sprite, flip, -sx, sx, 0, 0, fixed
         );
@@ -87,14 +72,14 @@ public class ShearSpriteRenderer extends SpriteRenderer
             (int)(x + offset.x),
             (int)(y + offset.y),
             (int)((z/2f) - sprite.getHeight()), 
-            sprite, flip, blendingColor, xShear, yShear, zxShear, zyShear, fixed
+            sprite, flip, blendingColor, xShear, yShear, 0, 0, fixed
         );
     }
 
     /**Render Function.*/
     @Override
-    public void render(Screen screen, Vector3f position)
-    {renderFunction.invoke(screen, position.x, position.y, position.z);}
+    public void render(Screen screen, Vector2f position)
+    {renderFunction.invoke(screen, position.x, position.y, 0.0f);}
 
     /**Render Function.*/
     @Override

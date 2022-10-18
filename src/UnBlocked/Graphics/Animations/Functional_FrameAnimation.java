@@ -150,7 +150,7 @@ public class Functional_FrameAnimation extends Animation
         spriteRenderer.setSprite(sprites[frame]);
 
         //Set Offsets.
-        spriteRenderer.setOffset(offsets[frame][0], offsets[frame][1], 0);
+        spriteRenderer.setOffset(offsets[frame][0], offsets[frame][1]);
 
         //Perform Action.
         actions[actionNumbers[frame]].perform(timeMod);

@@ -102,26 +102,26 @@ public abstract class Screen
      */
     public abstract void renderSprite(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
     public abstract void renderSprite(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
-    public abstract void renderSprite(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
-    public abstract void renderSprite(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
+    public abstract void renderSprite(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
+    public abstract void renderSprite(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
     //
     //Same functions but with default crop values.
     public final void renderSprite(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, boolean fixed){renderSprite(xPos, yPos, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, fixed);}
     public final void renderSprite(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, boolean fixed){renderSprite(xPos, yPos, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void renderSprite(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, boolean fixed){renderSprite(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void renderSprite(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, boolean fixed){renderSprite(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
+    public final void renderSprite(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, boolean fixed){renderSprite(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, fixed);}
+    public final void renderSprite(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, boolean fixed){renderSprite(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
     //
     //Same functions but with default wrap values.
     public final void renderSprite(int xPos, int yPos, Sprite sprite, byte flip, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed){renderSprite(xPos, yPos, sprite, flip, 0, 0, cropX0, cropY0, cropX1, cropY1, fixed);}
     public final void renderSprite(int xPos, int yPos, Sprite sprite, byte flip, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed){renderSprite(xPos, yPos, sprite, flip, 0, 0, blendingColor, cropX0, cropY0, cropX1, cropY1, fixed);}
-    public final void renderSprite(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed){renderSprite(xPos, yPos, zPos, depth, sprite, flip, 0, 0, cropX0, cropY0, cropX1, cropY1, fixed);}
-    public final void renderSprite(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed){renderSprite(xPos, yPos, zPos, depth, sprite, flip, 0, 0, blendingColor, cropX0, cropY0, cropX1, cropY1, fixed);}
+    public final void renderSprite(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed){renderSprite(xPos, yPos, zPos, sprite, flip, 0, 0, cropX0, cropY0, cropX1, cropY1, fixed);}
+    public final void renderSprite(int xPos, int yPos, int zPos, Sprite sprite, byte flip, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed){renderSprite(xPos, yPos, zPos, sprite, flip, 0, 0, blendingColor, cropX0, cropY0, cropX1, cropY1, fixed);}
     //
     //Same functions but with default wrap and crop values.
     public final void renderSprite(int xPos, int yPos, Sprite sprite, byte flip, boolean fixed){renderSprite(xPos, yPos, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, fixed);}
     public final void renderSprite(int xPos, int yPos, Sprite sprite, byte flip, Vector4f blendingColor, boolean fixed){renderSprite(xPos, yPos, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void renderSprite(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, boolean fixed){renderSprite(xPos, yPos, zPos, depth, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void renderSprite(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, Vector4f blendingColor, boolean fixed){renderSprite(xPos, yPos, zPos, depth, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
+    public final void renderSprite(int xPos, int yPos, int zPos, Sprite sprite, byte flip, boolean fixed){renderSprite(xPos, yPos, zPos, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, fixed);}
+    public final void renderSprite(int xPos, int yPos, int zPos, Sprite sprite, byte flip, Vector4f blendingColor, boolean fixed){renderSprite(xPos, yPos, zPos, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
 
 
     /**
@@ -129,52 +129,52 @@ public abstract class Screen
      */
     public abstract void renderSprite_Sc(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed);
     public abstract void renderSprite_Sc(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed);
-    public abstract void renderSprite_Sc(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed);
-    public abstract void renderSprite_Sc(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed);
+    public abstract void renderSprite_Sc(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed);
+    public abstract void renderSprite_Sc(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed);
     //
     //Default crop.
     public final void renderSprite_Sc(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
     public final void renderSprite_Sc(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
-    public final void renderSprite_Sc(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
-    public final void renderSprite_Sc(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
+    public final void renderSprite_Sc(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
+    public final void renderSprite_Sc(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
     //
     //Default wrap.
     public final void renderSprite_Sc(int xPos, int yPos, Sprite sprite, byte flip, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, sprite, flip, 0, 0, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
     public final void renderSprite_Sc(int xPos, int yPos, Sprite sprite, byte flip, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, sprite, flip, 0, 0, blendingColor, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
-    public final void renderSprite_Sc(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, depth, sprite, flip, 0, 0, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
-    public final void renderSprite_Sc(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, depth, sprite, flip, 0, 0, blendingColor, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
+    public final void renderSprite_Sc(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, sprite, flip, 0, 0, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
+    public final void renderSprite_Sc(int xPos, int yPos, int zPos, Sprite sprite, byte flip, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, sprite, flip, 0, 0, blendingColor, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
     //
     //Default wrap and crop.
     public final void renderSprite_Sc(int xPos, int yPos, Sprite sprite, byte flip, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
     public final void renderSprite_Sc(int xPos, int yPos, Sprite sprite, byte flip, Vector4f blendingColor, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
-    public final void renderSprite_Sc(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, depth, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
-    public final void renderSprite_Sc(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, Vector4f blendingColor, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, depth, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
+    public final void renderSprite_Sc(int xPos, int yPos, int zPos, Sprite sprite, byte flip, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
+    public final void renderSprite_Sc(int xPos, int yPos, int zPos, Sprite sprite, byte flip, Vector4f blendingColor, float xScale, float yScale, boolean fixed){renderSprite_Sc(xPos, yPos, zPos, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, xScale, yScale, fixed);}
 
     /**
      * Stretch (scaled sprite but it takes dimensions as parameters instead of scales)
      */
     public abstract void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed);
     public abstract void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed);
-    public abstract void renderSprite_St(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed);
-    public abstract void renderSprite_St(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed);
+    public abstract void renderSprite_St(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed);
+    public abstract void renderSprite_St(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed);
     //
     //Default crop.
-    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, 0, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
-    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, 0, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
-    public final void renderSprite_St(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
-    public final void renderSprite_St(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
     //
     //Default wrap.
-    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, 0, sprite, flip, 0, 0, cropX0, cropY0, cropX1, cropY1, resultWidth, resultHeight, fixed);}
-    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, 0, sprite, flip, 0, 0, blendingColor, cropX0, cropY0, cropX1, cropY1, resultWidth, resultHeight, fixed);}
-    public final void renderSprite_St(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, depth, sprite, flip, 0, 0, cropX0, cropY0, cropX1, cropY1, resultWidth, resultHeight, fixed);}
-    public final void renderSprite_St(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, depth, sprite, flip, 0, 0, blendingColor, cropX0, cropY0, cropX1, cropY1, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, sprite, flip, 0, 0, cropX0, cropY0, cropX1, cropY1, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, sprite, flip, 0, 0, blendingColor, cropX0, cropY0, cropX1, cropY1, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, sprite, flip, 0, 0, cropX0, cropY0, cropX1, cropY1, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, int zPos, Sprite sprite, byte flip, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, sprite, flip, 0, 0, blendingColor, cropX0, cropY0, cropX1, cropY1, resultWidth, resultHeight, fixed);}
     //
     //Default wrap and crop.
-    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, 0, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
-    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, Vector4f blendingColor, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, 0, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
-    public final void renderSprite_St(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, depth, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
-    public final void renderSprite_St(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, Vector4f blendingColor, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, depth, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, Vector4f blendingColor, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, 0, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
+    public final void renderSprite_St(int xPos, int yPos, int zPos, Sprite sprite, byte flip, Vector4f blendingColor, int resultWidth, int resultHeight, boolean fixed){renderSprite_St(xPos, yPos, zPos, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, resultWidth, resultHeight, fixed);}
 
 
     /**
@@ -203,23 +203,44 @@ public abstract class Screen
      */
     public abstract void renderSprite_Ro(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed);
     public abstract void renderSprite_Ro(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed);
-    public abstract void renderSprite_Ro(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed);
-    public abstract void renderSprite_Ro(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed);
+    public abstract void renderSprite_Ro(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed);
+    public abstract void renderSprite_Ro(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed);
     //
     //Default Crop.
     public final void renderSprite_Ro(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
     public final void renderSprite_Ro(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
-    public final void renderSprite_Ro(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
-    public final void renderSprite_Ro(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
+    public final void renderSprite_Ro(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
+    public final void renderSprite_Ro(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
     //
     //Default Wrap and Crop.
     public final void renderSprite_Ro(int xPos, int yPos, Sprite sprite, byte flip, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
     public final void renderSprite_Ro(int xPos, int yPos, Sprite sprite, byte flip, Vector4f blendingColor, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
-    public final void renderSprite_Ro(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, zPos, depth, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
-    public final void renderSprite_Ro(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, Vector4f blendingColor, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, zPos, depth, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
+    public final void renderSprite_Ro(int xPos, int yPos, int zPos, Sprite sprite, byte flip, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, zPos, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
+    public final void renderSprite_Ro(int xPos, int yPos, int zPos, Sprite sprite, byte flip, Vector4f blendingColor, float rads, int originX, int originY, boolean fixed){renderSprite_Ro(xPos, yPos, zPos, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, rads, originX, originY, fixed);}
     
 
+    /**
+     * Scale and Rotate
+     */
+    public abstract void renderSprite_ScRo(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, float rads, int originX, int originY, boolean fixed);
+    public abstract void renderSprite_ScRo(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, float rads, int originX, int originY, boolean fixed);
+    public abstract void renderSprite_ScRo(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, float rads, int originX, int originY, boolean fixed);
+    public abstract void renderSprite_ScRo(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, float rads, int originX, int originY, boolean fixed);
+    //
+    //Default Crop.
+    public final void renderSprite_ScRo(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, float xScale, float yScale, float rads, int originX, int originY, boolean fixed){renderSprite_ScRo(xPos, yPos, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, xScale, yScale, rads, originX, originY, fixed);}
+    public final void renderSprite_ScRo(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, float xScale, float yScale, float rads, int originX, int originY, boolean fixed){renderSprite_ScRo(xPos, yPos, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, xScale, yScale, rads, originX, originY, fixed);}
+    public final void renderSprite_ScRo(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, float xScale, float yScale, float rads, int originX, int originY, boolean fixed){renderSprite_ScRo(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, xScale, yScale, rads, originX, originY, fixed);}
+    public final void renderSprite_ScRo(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, float xScale, float yScale, float rads, int originX, int originY, boolean fixed){renderSprite_ScRo(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, xScale, yScale, rads, originX, originY, fixed);}
+    //
+    //Default Wrap and Crop.
+    public final void renderSprite_ScRo(int xPos, int yPos, Sprite sprite, byte flip, float xScale, float yScale, float rads, int originX, int originY, boolean fixed){renderSprite_ScRo(xPos, yPos, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, xScale, yScale, rads, originX, originY, fixed);}
+    public final void renderSprite_ScRo(int xPos, int yPos, Sprite sprite, byte flip, Vector4f blendingColor, float xScale, float yScale, float rads, int originX, int originY, boolean fixed){renderSprite_ScRo(xPos, yPos, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, xScale, yScale, rads, originX, originY, fixed);}
+    public final void renderSprite_ScRo(int xPos, int yPos, int zPos, Sprite sprite, byte flip, float xScale, float yScale, float rads, int originX, int originY, boolean fixed){renderSprite_ScRo(xPos, yPos, zPos, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, xScale, yScale, rads, originX, originY, fixed);}
+    public final void renderSprite_ScRo(int xPos, int yPos, int zPos, Sprite sprite, byte flip, Vector4f blendingColor, float xScale, float yScale, float rads, int originX, int originY, boolean fixed){renderSprite_ScRo(xPos, yPos, zPos, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, xScale, yScale, rads, originX, originY, fixed);}
     
+
+
     /**
      * Tile-Specific (Renders a Sprite without overriding pixels already on the screen).
      */
@@ -239,24 +260,17 @@ public abstract class Screen
     /**
      * Renders a sprite using any combination of affine transformations via a Matrix4f.
      */
-    public abstract void renderSprite_Affine_2D(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
-    public abstract void renderSprite_Affine_2D(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
-    public abstract void renderSprite_Affine(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
-    public abstract void renderSprite_Affine(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
+    /*
+    public abstract void renderSprite_Matrix(int xPos, int yPos, Matrix4f matrix, int originX, int originY, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
+    public abstract void renderSprite_Matrix(int xPos, int yPos, Matrix4f matrix, int originX, int originY, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
     //
+    public final void renderSprite_Matrix(int xPos, int yPos, Matrix4f matrix, int originX, int originY, Sprite sprite, byte flip, int wrapX, int wrapY, boolean fixed){renderSprite_Matrix(xPos, yPos, matrix, originX, originY, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, fixed);}
+    public final void renderSprite_Matrix(int xPos, int yPos, Matrix4f matrix, int originX, int originY, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, boolean fixed){renderSprite_Matrix(xPos,  yPos, matrix, originX, originY, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
     //
-    public final void renderSprite_Affine_2D(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, boolean fixed){renderSprite_Affine_2D(matrix, invertedMatrix, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void renderSprite_Affine_2D(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, boolean fixed){renderSprite_Affine_2D(matrix, invertedMatrix, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void renderSprite_Affine(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, boolean fixed){renderSprite_Affine(matrix, invertedMatrix, sprite, flip, wrapX, wrapY, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void renderSprite_Affine(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, boolean fixed){renderSprite_Affine(matrix, invertedMatrix, sprite, flip, wrapX, wrapY, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
-    //
-    //
-    public final void renderSprite_Affine_2D(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, boolean fixed){renderSprite_Affine_2D(matrix, invertedMatrix, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void renderSprite_Affine_2D(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, Vector4f blendingColor, boolean fixed){renderSprite_Affine_2D(matrix, invertedMatrix, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void renderSprite_Affine(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, boolean fixed){renderSprite_Affine(matrix, invertedMatrix, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void renderSprite_Affine(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, Vector4f blendingColor, boolean fixed){renderSprite_Affine(matrix, invertedMatrix, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
+    public final void renderSprite_Matrix(int xPos, int yPos, Matrix4f matrix, int originX, int originY, Sprite sprite, byte flip, boolean fixed){renderSprite_Matrix(xPos, yPos, matrix, originX, originY, sprite, flip, 0, 0, 0, 0, WIDTH, HEIGHT, fixed);}
+    public final void renderSprite_Matrix(int xPos, int yPos, Matrix4f matrix, int originX, int originY, Sprite sprite, byte flip, Vector4f blendingColor, boolean fixed){renderSprite_Matrix(xPos, yPos, matrix, originX, originY, sprite, flip, 0, 0, blendingColor, 0, 0, WIDTH, HEIGHT, fixed);}
+    */
     
-
     /**Renders a sprite using 4 points.*/
     public abstract void renderSprite_Quad(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3,
     Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
@@ -314,10 +328,10 @@ public abstract class Screen
 
     /**Renders a filled Rectangle.*/
     public abstract void fillRect(int xPos, int yPos, int w, int h, Vector4f vecColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
-    public abstract void fillRect(int xPos, int yPos, int zPos, int depth, int w, int h, Vector4f vecColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
+    public abstract void fillRect(int xPos, int yPos, int zPos, int w, int h, Vector4f vecColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed);
     //
     public final void fillRect(int xPos, int yPos, int w, int h, Vector4f vecColor, boolean fixed){fillRect(xPos, yPos, w, h, vecColor, 0, 0, WIDTH, HEIGHT, fixed);}
-    public final void fillRect(int xPos, int yPos, int zPos, int depth, int w, int h, Vector4f vecColor, boolean fixed){fillRect(xPos, yPos, zPos, depth, w, h, vecColor, 0, 0, WIDTH, HEIGHT, fixed);}
+    public final void fillRect(int xPos, int yPos, int zPos, int w, int h, Vector4f vecColor, boolean fixed){fillRect(xPos, yPos, zPos, w, h, vecColor, 0, 0, WIDTH, HEIGHT, fixed);}
     
 
     /**Draws a Quad.*/

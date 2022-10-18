@@ -16,6 +16,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import org.joml.Vector4f;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import UnBlocked.Game;
@@ -1087,59 +1088,44 @@ public class OpenGLScreen extends Screen
     public void renderSheet(int xPos, int yPos, int zPos, SpriteSheet sheet, boolean fixed){}
     public void renderSheet(int xPos, int yPos, int zPos, SpriteSheet sheet, Vector4f blendingColor, boolean fixed){}
     
+    
     @Override
     /**Renders a Sprite.*/
     public void renderSprite(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
-    {renderSprite(xPos, yPos, 0, 0, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, fixed);}
+    {renderSprite(xPos, yPos, 0, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, fixed);}
     //
     public void renderSprite(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
-    {renderSprite(xPos, yPos, 0, 0, sprite, flip, wrapX, wrapY, blendingColor, cropX0, cropY0, cropX1, cropY1, fixed);}
+    {renderSprite(xPos, yPos, 0, sprite, flip, wrapX, wrapY, blendingColor, cropX0, cropY0, cropX1, cropY1, fixed);}
     //
-    public void renderSprite(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
-    {renderSprite(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, fixed);}
+    public void renderSprite(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
+    {renderSprite(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, fixed);}
     //
-    public void renderSprite(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
+    public void renderSprite(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
     {
         if(sprite.getWidth() == 0 || sprite.getHeight() == 0){return;}
-
-        //Normal stuff.
-        float half_depth = (depth / 2f);
-        float zNormal = (sprite.getHeight() - half_depth) / (float)sprite.getHeight();
-        float yNormal = (depth == 0) ? 0 : (sprite.getHeight() / half_depth);
-        float internalHeight = (sprite.getHeight() * zNormal);
 
         //Wrap stuff.
         wrapX %= sprite.getWidth();
         wrapY %= sprite.getHeight();
-        int wrapZ = (int)(wrapY * 2 * yNormal);
 
         int wrapFlags = ((wrapY != 0) ? 0b10 : 0) | ((wrapX != 0) ? 0b01 : 0),
         wrapInc = (wrapFlags == 0b10) ? 2 : 1;
 
         for(int w = 0b00; w <= wrapFlags; w += wrapInc)
         {
+            float
+            x0 = xPos + (((0b01 & w) == 0b01) ? sprite.getWidth() - wrapX : 0),
+            y0 = yPos + (((0b10 & w) == 0b10) ? sprite.getHeight() - wrapY : 0),
+            x1 = xPos + (((0b01 & w) == 0b01) ? sprite.getWidth() : sprite.getWidth() - wrapX),
+            y1 = yPos + (((0b10 & w) == 0b10) ? sprite.getHeight() : sprite.getHeight() - wrapY);
+
             //Pass the data to a RenderBatch.
             add_basic
             (
-                //UL
-                xPos + (((0b01 & w) == 0b01) ? sprite.getWidth() - wrapX : 0),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight - wrapY : 0),
-                zPos - (((0b10 & w) == 0b10) ? (depth - wrapZ) : 0),
-                //
-                //UR
-                xPos + (((0b01 & w) == 0b01) ? sprite.getWidth() : sprite.getWidth() - wrapX),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight - wrapY : 0),
-                zPos - (((0b10 & w) == 0b10) ? (depth - wrapZ) : 0),
-                //
-                //DR
-                xPos + (((0b01 & w) == 0b01) ? sprite.getWidth() : sprite.getWidth() - wrapX),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight : internalHeight - wrapY),
-                zPos - (((0b10 & w) == 0b10) ? depth : (depth - wrapZ)),
-                //
-                //DL
-                xPos + (((0b01 & w) == 0b01) ? sprite.getWidth() - wrapX : 0),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight : internalHeight - wrapY),
-                zPos - (((0b10 & w) == 0b10) ? depth : (depth - wrapZ)),
+                x0, y0, 0,
+                x1, y0, 0,
+                x1, y1, 0,
+                x0, y1, 0,
                 //
                 blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
             );
@@ -1147,18 +1133,19 @@ public class OpenGLScreen extends Screen
     }
 
 
+
     @Override
     /**Renders a scaled Sprite.*/
     public void renderSprite_Sc(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed)
-    {renderSprite_Sc(xPos, yPos, 0, 0, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
+    {renderSprite_Sc(xPos, yPos, 0, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
     //
     public void renderSprite_Sc(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed)
-    {renderSprite_Sc(xPos, yPos, 0, 0, sprite, flip, wrapX, wrapY, blendingColor, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
+    {renderSprite_Sc(xPos, yPos, 0, sprite, flip, wrapX, wrapY, blendingColor, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
     //
-    public void renderSprite_Sc(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed)
-    {renderSprite_Sc(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
+    public void renderSprite_Sc(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed)
+    {renderSprite_Sc(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, xScale, yScale, fixed);}
     //
-    public void renderSprite_Sc(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed)
+    public void renderSprite_Sc(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xScale, float yScale, boolean fixed)
     {
         if(sprite.getWidth() == 0 || sprite.getHeight() == 0){return;}
 
@@ -1168,114 +1155,76 @@ public class OpenGLScreen extends Screen
         resultHeight = (int)((sprite.getHeight() * yScale)//);
          + 0.5f);
 
-        //Normal stuff.
-        float half_depth = (depth / 2f);
-        float zNormal = (resultHeight - half_depth) / (float)resultHeight;
-        float yNormal = (depth == 0) ? 0 : (resultHeight / half_depth);
-        float internalHeight = (resultHeight * zNormal);
-
         //Wrap stuff.
         wrapX %= sprite.getWidth();
         wrapY %= sprite.getHeight();
         int swx = (int)(wrapX * xScale);
-        
-        float scaleWrapY = (wrapY * yScale);
-        int swy = (int)(scaleWrapY * zNormal);
-        int wrapZ = (int)(scaleWrapY * 2 * yNormal);
+        int swy = (int)(wrapY * yScale);
 
         int wrapFlags = ((wrapY != 0) ? 0b10 : 0) | ((wrapX != 0) ? 0b01 : 0),
         wrapInc = (wrapFlags == 0b10) ? 2 : 1;
 
         for(int w = 0b00; w <= wrapFlags; w += wrapInc)
         {
+            float
+            x0 = xPos + (((0b01 & w) == 0b01) ? resultWidth - swx : 0),
+            y0 = yPos + (((0b10 & w) == 0b10) ? resultHeight - swy : 0),
+            x1 = xPos + (((0b01 & w) == 0b01) ? resultWidth : resultWidth - swx),
+            y1 = yPos + (((0b10 & w) == 0b10) ? resultHeight : resultHeight - swy);
+
             //Pass the data to a RenderBatch.
             add_basic
             (
-                //UL
-                xPos + (((0b01 & w) == 0b01) ? resultWidth - swx : 0),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight - swy : 0),
-                zPos - (((0b10 & w) == 0b10) ? (depth - wrapZ) : 0),
-                //
-                //UR
-                xPos + (((0b01 & w) == 0b01) ? resultWidth : resultWidth - swx),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight - swy : 0),
-                zPos - (((0b10 & w) == 0b10) ? (depth - wrapZ) : 0),
-                //
-                //DR
-                xPos + (((0b01 & w) == 0b01) ? resultWidth : resultWidth - swx),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight : internalHeight - swy),
-                zPos - (((0b10 & w) == 0b10) ? depth : (depth - wrapZ)),
-                //
-                //DL
-                xPos + (((0b01 & w) == 0b01) ? resultWidth - swx : 0),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight : internalHeight - swy),
-                zPos - (((0b10 & w) == 0b10) ? depth : (depth - wrapZ)),
+                x0, y0, 0,
+                x1, y0, 0,
+                x1, y1, 0,
+                x0, y1, 0,
                 //
                 blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
             );
         }
     }
-
-    
-    
+ 
 
 
 
     @Override
     /**Renders a stretch Sprite.*/
     public void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed)
-    {renderSprite_St(xPos, yPos, 0, 0, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1,  cropY1, resultWidth, resultHeight, fixed);}
+    {renderSprite_St(xPos, yPos, 0, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1,  cropY1, resultWidth, resultHeight, fixed);}
     //
     public void renderSprite_St(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed)
-    {renderSprite_St(xPos, yPos, 0, 0, sprite, flip, wrapX, wrapY, blendingColor, cropX0, cropY0, cropX1,  cropY1, resultWidth, resultHeight, fixed);}
+    {renderSprite_St(xPos, yPos, 0, sprite, flip, wrapX, wrapY, blendingColor, cropX0, cropY0, cropX1,  cropY1, resultWidth, resultHeight, fixed);}
     //
-    public void renderSprite_St(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed)
-    {renderSprite_St(xPos, yPos, zPos, depth, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1,  cropY1, resultWidth, resultHeight, fixed);}
+    public void renderSprite_St(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed)
+    {renderSprite_St(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1,  cropY1, resultWidth, resultHeight, fixed);}
     //
-    public void renderSprite_St(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed)
+    public void renderSprite_St(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, int resultWidth, int resultHeight, boolean fixed)
     {
-        //Normal stuff.
-        float half_depth = (depth / 2f);
-        float zNormal = (resultHeight - half_depth) / (float)resultHeight;
-        float yNormal = (depth == 0) ? 0 : (resultHeight / half_depth);
-        float internalHeight = (resultHeight * zNormal);
-
         //Wrap stuff.
         wrapX %= sprite.getWidth();
         wrapY %= sprite.getHeight();
         int swx = (int)((wrapX / (float)sprite.getWidth()) * resultWidth);
-
-        float scaleWrapY = ((wrapY / (float)sprite.getHeight()) * resultHeight);
-        int swy = (int)(scaleWrapY * zNormal);
-        int wrapZ = (int)(scaleWrapY * 2 * yNormal);
+        int swy = (int)((wrapY / (float)sprite.getHeight()) * resultHeight);
 
         int wrapFlags = ((wrapY != 0) ? 0b10 : 0) | ((wrapX != 0) ? 0b01 : 0),
         wrapInc = (wrapFlags == 0b10) ? 2 : 1;
 
         for(int w = 0b00; w <= wrapFlags; w += wrapInc)
         {
+            float
+            x0 = xPos + (((0b01 & w) == 0b01) ? resultWidth - swx : 0),
+            y0 = yPos + (((0b10 & w) == 0b10) ? resultHeight - swy : 0),
+            x1 = xPos + (((0b01 & w) == 0b01) ? resultWidth : resultWidth - swx),
+            y1 = yPos + (((0b10 & w) == 0b10) ? resultHeight : resultHeight - swy);
+
             //Pass the data to a RenderBatch.
             add_basic
             (
-                //UL
-                xPos + (((0b01 & w) == 0b01) ? resultWidth - swx : 0),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight - swy : 0),
-                zPos - (((0b10 & w) == 0b10) ? depth - wrapZ : 0),
-                //
-                //UR
-                xPos + (((0b01 & w) == 0b01) ? resultWidth : resultWidth - swx),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight - swy : 0),
-                zPos - (((0b10 & w) == 0b10) ? depth - wrapZ : 0),
-                //
-                //DR
-                xPos + (((0b01 & w) == 0b01) ? resultWidth : resultWidth - swx),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight : internalHeight - swy),
-                zPos - (((0b10 & w) == 0b10) ? depth : depth - wrapZ),
-                //
-                //DL
-                xPos + (((0b01 & w) == 0b01) ? resultWidth - swx : 0),
-                yPos + (((0b10 & w) == 0b10) ? internalHeight : internalHeight - swy),
-                zPos - (((0b10 & w) == 0b10) ? depth : depth - wrapZ),
+                x0, y0, 0,
+                x1, y0, 0,
+                x1, y1, 0,
+                x0, y1, 0,
                 //
                 blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
             );
@@ -1295,45 +1244,215 @@ public class OpenGLScreen extends Screen
     //
     public void renderSprite_Sh(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float xShear, float yShear, float zxShear, float zyShear, boolean fixed)
     {
-        yPos -= (zPos/2);
-        //
-        add_basic
-        (
-            xPos,
-            yPos,
-            zPos,
+        //add_basic
+        //(
+            //xPos + (0 + (0 * xShear)),
+            //yPos + (0 + (0 * yShear)),
+            //zPos,
             //
-            xPos + (sprite.getWidth() + (0 * xShear)),
-            yPos + (0 + (sprite.getWidth() * yShear)),
-            zPos,
+            //xPos + (sprite.getWidth() + (0 * xShear)),
+            //yPos + (0 + (sprite.getWidth() * yShear)),
+            //zPos,
             //
-            xPos + (sprite.getWidth() + (sprite.getHeight() * xShear)),
-            yPos + (sprite.getHeight() + (sprite.getWidth() * yShear)),
-            zPos,
+            //xPos + (sprite.getWidth() + (sprite.getHeight() * xShear)),
+            //yPos + (sprite.getHeight() + (sprite.getWidth() * yShear)),
+            //zPos,
             //
-            xPos + (0 + (sprite.getHeight() * xShear)),
-            yPos + (sprite.getHeight() + (0 * yShear)),
-            zPos,
+            //xPos + (0 + (sprite.getHeight() * xShear)),
+            //yPos + (sprite.getHeight() + (0 * yShear)),
+            //zPos,
             //
-            blendingColor, sprite, 0, 0, 0, fixed
-        );
+            //blendingColor, sprite, 0, 0, 0, fixed
+        //);
+
+        if(sprite.getWidth() == 0 || sprite.getHeight() == 0){return;}
+
+        //Wrap stuff.
+        wrapX %= sprite.getWidth();
+        wrapY %= sprite.getHeight();
+
+        int wx = (sprite.getWidth() - wrapX), wy = (sprite.getHeight() - wrapY);
+
+        int wrapFlags = ((wrapY != 0) ? 0b10 : 0) | ((wrapX != 0) ? 0b01 : 0),
+        wrapInc = (wrapFlags == 0b10) ? 2 : 1;
+
+        for(int w = 0b00; w <= wrapFlags; w += wrapInc)
+        {
+            float
+            x0 = xPos + (((0b01 & w) == 0b01) ? (wx + (wy * xShear)) : (0 + (0 * xShear))),
+            y0 = yPos + (((0b10 & w) == 0b10) ? (wy + (wx * yShear)) : (0 + (0 * yShear))),
+            //
+            x1 = xPos + (((0b01 & w) == 0b01) ? (sprite.getWidth() + (wy * xShear)) : (wx + (0 * xShear))),
+            y1 = yPos + (((0b10 & w) == 0b10) ? (wy + (sprite.getWidth() * yShear)) : (0 + (wx * yShear))),
+            //
+            x2 = xPos + (((0b01 & w) == 0b01) ? (sprite.getWidth() + (sprite.getHeight() * xShear)) : (wx + (wy * xShear))),
+            y2 = yPos + (((0b10 & w) == 0b10) ? (sprite.getHeight() + (sprite.getWidth() * yShear)) : (wy + (wx * yShear))),
+            //
+            x3 = xPos + (((0b01 & w) == 0b01) ? (wx + (sprite.getHeight() * xShear)) : (0 + (wy * xShear))),
+            y3 = yPos + (((0b10 & w) == 0b10) ? (sprite.getHeight() + (wx * yShear)) : (wy + (0 * yShear)));
+
+            //Pass the data to a RenderBatch.
+            add_basic
+            (
+                x0, y0, 0,
+                x1, y1, 0,
+                x2, y2, 0,
+                x3, y3, 0,
+                //
+                blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
+            );
+        }
     }
 
     @Override
     /**Renders a rotated Sprite.*/
     public void renderSprite_Ro(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed)
-    {}
+    {renderSprite_Ro(xPos, yPos, 0, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, rads, originX, originY, fixed);}
     //
     public void renderSprite_Ro(int xPos, int yPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed)
-    {}
+    {renderSprite_Ro(xPos, yPos, 0, sprite, flip, wrapX, wrapY, blendingColor, cropX0, cropY0, cropX1, cropY1, rads, originX, originY, fixed);}
     //
-    public void renderSprite_Ro(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed)
-    {}
+    public void renderSprite_Ro(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed)
+    {renderSprite_Ro(xPos, yPos, zPos, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, rads, originX, originY, fixed);}
     //
-    public void renderSprite_Ro(int xPos, int yPos, int zPos, int depth, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed)
+    public void renderSprite_Ro(int xPos, int yPos, int zPos, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, float rads, int originX, int originY, boolean fixed)
     {
+        //Sprite Dimensions and zero check.
+        int sprite_width = sprite.getWidth(), sprite_height = sprite.getHeight();
+        if(sprite_width == 0 || sprite_height == 0){return;}
 
+        //Trig...
+        float sin = (float)Math.sin(rads), cos = (float)Math.cos(rads);
+
+        //Multiply the origin by sin and cos for the actual result origin.
+        float oX = ((originX * cos) + (originY * -sin));
+        float oY = ((originX * sin) + (originY * cos));
+
+        //Wrap stuff.
+        wrapX %= sprite_width;
+        wrapY %= sprite_height;
+
+        int wx = (sprite_width - wrapX), wy = (sprite_height - wrapY);
+
+        int wrapFlags = ((wrapY != 0) ? 0b10 : 0) | ((wrapX != 0) ? 0b01 : 0),
+        wrapInc = (wrapFlags == 0b10) ? 2 : 1;
+
+        for(int w = 0b00; w <= wrapFlags; w += wrapInc)
+        {
+            float
+            x0 = (((0b01 & w) == 0b01) ? ((wx * cos) + (wy * -sin)) : 0) - oX,//((0 * cos) + (0 * -sin)) - oX,
+            y0 = (((0b10 & w) == 0b10) ? ((wx * sin) + (wy * cos)) : 0) - oY,//((0 * sin) + (0 * cos)) - oY,
+            //
+            x1 = (((0b01 & w) == 0b01) ? ((sprite_width * cos) + (wy * -sin)) : (wx * cos)) - oX,//((wx * cos) + (0 * -sin))) - oX,
+            y1 = (((0b10 & w) == 0b10) ? ((sprite_width * sin) + (wy * cos)) : (wx * sin)) - oY,//((wx * sin) + (0 * cos))) - oY,
+            //
+            x2 = (((0b01 & w) == 0b01) ? ((sprite_width * cos) + (sprite_height * -sin)) : ((wx * cos) + (wy * -sin))) - oX,
+            y2 = (((0b10 & w) == 0b10) ? ((sprite_width * sin) + (sprite_height * cos)) : ((wx * sin) + (wy * cos))) - oY,
+            //
+            x3 = (((0b01 & w) == 0b01) ? ((wx * cos) + (sprite_height * -sin)) : (wy * -sin)) - oX,//((0 * cos) + (wy * -sin))) - oX,
+            y3 = (((0b10 & w) == 0b10) ? ((wx * sin) + (sprite_height * cos)) : (wy * cos)) - oY;//((0 * sin) + (wy * cos))) - oY;
+
+            //Pass the data to a RenderBatch.
+            add_basic
+            (
+                x0, y0, 0,
+                x1, y1, 0,
+                x2, y2, 0,
+                x3, y3, 0,
+                //
+                blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
+            );
+        }
     }
+
+
+
+
+
+    @Override
+    /**Renders a scaled and rotated Sprite.*/
+    public void renderSprite_ScRo(int xPos, int yPos, Sprite sprite, byte flip,
+    int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1,
+    float xScale, float yScale, float rads, int originX, int originY, boolean fixed)
+    {
+        renderSprite_ScRo(xPos, yPos, 0, sprite, flip,
+        wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1,
+        xScale, yScale, rads, originX, originY, fixed);
+    }
+
+    @Override
+    public void renderSprite_ScRo(int xPos, int yPos, Sprite sprite, byte flip,
+    int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1,
+    float xScale, float yScale, float rads, int originX, int originY, boolean fixed)
+    {
+        renderSprite_ScRo(xPos, yPos, 0, sprite, flip,
+        wrapX, wrapY, blendingColor, cropX0, cropY0, cropX1, cropY1,
+        xScale, yScale, rads, originX, originY, fixed);
+    }
+
+    @Override
+    public void renderSprite_ScRo(int xPos, int yPos, int zPos, Sprite sprite, byte flip,
+    int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1,
+    float xScale, float yScale, float rads, int originX, int originY, boolean fixed)
+    {
+        renderSprite_ScRo(xPos, yPos, zPos, sprite, flip,
+        wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1,
+        xScale, yScale, rads, originX, originY, fixed);
+    }
+
+    @Override
+    public void renderSprite_ScRo(int xPos, int yPos, int zPos, Sprite sprite, byte flip,
+    int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1,
+    float xScale, float yScale, float rads, int originX, int originY, boolean fixed)
+    {
+        //Zero check and Result Dimensions.
+        if(sprite.getWidth() == 0 || sprite.getHeight() == 0 || xScale == 0.0f || yScale == 0.0f){return;}
+        float resultWidth = sprite.getWidth() * xScale, resultHeight = sprite.getHeight() * yScale;
+
+        //Trig...
+        float sin = (float)Math.sin(rads), cos = (float)Math.cos(rads);
+
+        //Multiply the origin by sin and cos for the actual result origin.
+        float oX = ((originX * cos) + (originY * -sin));
+        float oY = ((originX * sin) + (originY * cos));
+
+        //Wrap stuff.
+        wrapX %= sprite.getWidth();
+        wrapY %= sprite.getHeight();
+
+        float wx = (sprite.getWidth() - wrapX) * xScale, wy = (sprite.getHeight() - wrapY) * yScale;
+
+        int wrapFlags = ((wrapY != 0) ? 0b10 : 0) | ((wrapX != 0) ? 0b01 : 0),
+        wrapInc = (wrapFlags == 0b10) ? 2 : 1;
+
+        for(int w = 0b00; w <= wrapFlags; w += wrapInc)
+        {
+            float
+            x0 = (((0b01 & w) == 0b01) ? ((wx * cos) + (wy * -sin)) : 0) - oX,//((0 * cos) + (0 * -sin)) - oX,
+            y0 = (((0b10 & w) == 0b10) ? ((wx * sin) + (wy * cos)) : 0) - oY,//((0 * sin) + (0 * cos)) - oY,
+            //
+            x1 = (((0b01 & w) == 0b01) ? ((resultWidth * cos) + (wy * -sin)) : (wx * cos)) - oX,//((wx * cos) + (0 * -sin))) - oX,
+            y1 = (((0b10 & w) == 0b10) ? ((resultWidth * sin) + (wy * cos)) : (wx * sin)) - oY,//((wx * sin) + (0 * cos))) - oY,
+            //
+            x2 = (((0b01 & w) == 0b01) ? ((resultWidth * cos) + (resultHeight * -sin)) : ((wx * cos) + (wy * -sin))) - oX,
+            y2 = (((0b10 & w) == 0b10) ? ((resultWidth * sin) + (resultHeight * cos)) : ((wx * sin) + (wy * cos))) - oY,
+            //
+            x3 = (((0b01 & w) == 0b01) ? ((wx * cos) + (resultHeight * -sin)) : (wy * -sin)) - oX,//((0 * cos) + (wy * -sin))) - oX,
+            y3 = (((0b10 & w) == 0b10) ? ((wx * sin) + (resultHeight * cos)) : (wy * cos)) - oY;//((0 * sin) + (wy * cos))) - oY;
+
+            //Pass the data to a RenderBatch.
+            add_basic
+            (
+                x0, y0, 0,
+                x1, y1, 0,
+                x2, y2, 0,
+                x3, y3, 0,
+                //
+                blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
+            );
+        }
+    }
+
 
 
 
@@ -1564,18 +1683,72 @@ public class OpenGLScreen extends Screen
 
 
 
-
-
+    /*
+    private final Matrix4f TRANSFORM_MAT = new Matrix4f();
+    private final Vector4f TRANSFORM_VEC = new Vector4f();
 
     @Override
-    /**Renders a sprite using any combination of affine transformations.*/
-    public void renderSprite_Affine_2D(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed){}
-    public void renderSprite_Affine_2D(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed){}
-    public void renderSprite_Affine(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed){}
-    public void renderSprite_Affine(Matrix4f matrix, Matrix4f invertedMatrix, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
+    //Renders a sprite using any combination of affine transformations.
+    public void renderSprite_Matrix(int xPos, int yPos, Matrix4f matrix, int originX, int originY, Sprite sprite, byte flip, int wrapX, int wrapY, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
+    {renderSprite_Matrix(xPos, yPos, matrix, originX, originY, sprite, flip, wrapX, wrapY, Screen.DEFAULT_BLEND, cropX0, cropY0, cropX1, cropY1, fixed);}
+    //
+    @Override
+    public void renderSprite_Matrix(int xPos, int yPos, Matrix4f matrix, int originX, int originY, Sprite sprite, byte flip, int wrapX, int wrapY, Vector4f blendingColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
     {
+        if(sprite.getWidth() == 0 || sprite.getHeight() == 0){return;}
 
+        matrix.translate(-originX, -originY, 0, TRANSFORM_MAT);
+
+        //Wrap stuff.
+        wrapX %= sprite.getWidth();
+        wrapY %= sprite.getHeight();
+
+        int wrapFlags = ((wrapY != 0) ? 0b10 : 0) | ((wrapX != 0) ? 0b01 : 0),
+        wrapInc = (wrapFlags == 0b10) ? 2 : 1;
+
+        for(int w = 0b00; w <= wrapFlags; w += wrapInc)
+        {
+            float
+            x0 = xPos + (((0b01 & w) == 0b01) ? sprite.getWidth() - wrapX : 0),
+            y0 = yPos + (((0b10 & w) == 0b10) ? sprite.getHeight() - wrapY : 0),
+            x1 = xPos + (((0b01 & w) == 0b01) ? sprite.getWidth() : sprite.getWidth() - wrapX),
+            y1 = yPos + (((0b10 & w) == 0b10) ? sprite.getHeight() : sprite.getHeight() - wrapY);
+
+            //UL
+            TRANSFORM_VEC.set(x0, y0, 1, 1);
+            TRANSFORM_VEC.mul(matrix);
+            float ulX = TRANSFORM_VEC.x, ulY = TRANSFORM_VEC.y;
+
+            //UR
+            TRANSFORM_VEC.set(x1, y0, 1, 1);
+            TRANSFORM_VEC.mul(matrix);
+            float urX = TRANSFORM_VEC.x, urY = TRANSFORM_VEC.y;
+
+            //DR
+            TRANSFORM_VEC.set(x1, y1, 1, 1);
+            TRANSFORM_VEC.mul(matrix);
+            float drX = TRANSFORM_VEC.x, drY = TRANSFORM_VEC.y;
+
+            //DL
+            TRANSFORM_VEC.set(x0, y1, 1, 1);
+            TRANSFORM_VEC.mul(matrix);
+            float dlX = TRANSFORM_VEC.x, dlY = TRANSFORM_VEC.y;
+
+            //Pass the data to a RenderBatch.
+            add_basic
+            (
+                ulX, ulY, 0,
+                urX, urY, 0,
+                drX, drY, 0,
+                dlX, dlY, 0,
+                //
+                blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
+            );
+        }
     }
+    */
+
+
     
     @Override
     /**Renders a sprite using 4 points.*/
@@ -1645,10 +1818,10 @@ public class OpenGLScreen extends Screen
 
     @Override
     public void fillRect(int xPos, int yPos, int w, int h, Vector4f vecColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
-    {renderSprite_St(xPos, yPos, 0, 0, Sprites.whiteSprite, Sprite.FLIP_NONE, 0, 0, vecColor, cropX0, cropY0, cropX1, cropY1, w, h, fixed);}
+    {renderSprite_St(xPos, yPos, 0, Sprites.whiteSprite, Sprite.FLIP_NONE, 0, 0, vecColor, cropX0, cropY0, cropX1, cropY1, w, h, fixed);}
     //
-    public void fillRect(int xPos, int yPos, int zPos, int depth, int w, int h, Vector4f vecColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
-    {renderSprite_St(xPos, yPos, zPos, depth, Sprites.whiteSprite, Sprite.FLIP_NONE, 0, 0, vecColor, cropX0, cropY0, cropX1, cropY1, w, h, fixed);}
+    public void fillRect(int xPos, int yPos, int zPos, int w, int h, Vector4f vecColor, int cropX0, int cropY0, int cropX1, int cropY1, boolean fixed)
+    {renderSprite_St(xPos, yPos, zPos, Sprites.whiteSprite, Sprite.FLIP_NONE, 0, 0, vecColor, cropX0, cropY0, cropX1, cropY1, w, h, fixed);}
 
 
     @Override
@@ -1688,4 +1861,7 @@ public class OpenGLScreen extends Screen
     {
         add_circle(xPos, yPos, zPos, radius, vecColor, thickness, fixed);
     }
+
+
+    
 }
