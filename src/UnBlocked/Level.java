@@ -27,7 +27,7 @@ public class Level
     private byte[] tiles, entities;
 
     //Tile animations.
-    private Tile[][] tileAnims = new Tile[2][8];
+    private Tile[] background_TileAnims = new Tile[15], playground_TileAnims = new Tile[15];
     private byte num_backgroundTiles, num_playgroundTiles;
 
     //Camera.
@@ -37,6 +37,14 @@ public class Level
     public Level(File file)
     {
         this.camera = new LevelCamera(this);
+    }
+
+    //Gawd diamit Java...
+    private byte[] intArrayToByteArrayCast(int[] data)
+    {
+        byte[] result = new byte[data.length];
+        for(int i = 0; i < data.length; i++){result[i] = (byte)data[i];}
+        return result;
     }
 
     /**Test Constructor.*/
@@ -50,25 +58,27 @@ public class Level
         this.height = 6;
 
         //Set tiles.
-        this.tiles = new byte[]
-        {
-            8, 8, 8, 8, 8, 8,
-            9, 0, 1, 1, 0, 9,
-            9, 0, 1, 1, 0, 9,
-            9, 0, 1, 1, 0, 9,
-            9, 0, 1, 1, 0, 9,
-            8, 8, 8, 8, 8, 8,
-        };
+        this.tiles = intArrayToByteArrayCast(
+            new int[]
+            {
+                0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+                0x20, 0x01, 0x02, 0x02, 0x01, 0x20,
+                0x20, 0x01, 0x02, 0x02, 0x01, 0x20,
+                0x20, 0x01, 0x02, 0x02, 0x01, 0x20,
+                0x20, 0x01, 0x02, 0x02, 0x01, 0x20,
+                0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+            }
+        );
 
         //Color vector.
         Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
         //Set animations.
         SpriteSheet testBrick = Sprites.loadTileSheet("TestBrick");
-        tileAnims[0][0] = new Tile(new Sprite(testBrick, 0, 0, 20, 20), 4, -4, color);
-        tileAnims[0][1] = new Tile(new Sprite(testBrick, 20, 0, 20, 20), 4, -4, color);
-        tileAnims[1][0] = new Tile(new Sprite(testBrick, 0, 20, 20, 20), 0, 0, color);
-        tileAnims[1][1] = new Tile(new Sprite(testBrick, 20, 20, 20, 20), 0, 0, color);
+        background_TileAnims[0] = new Tile(new Sprite(testBrick, 0, 0, 20, 20), 4, -4, color);
+        background_TileAnims[1] = new Tile(new Sprite(testBrick, 20, 0, 20, 20), 4, -4, color);
+        playground_TileAnims[0] = new Tile(new Sprite(testBrick, 0, 20, 20, 20), 0, 0, color);
+        playground_TileAnims[1] = new Tile(new Sprite(testBrick, 20, 20, 20, 20), 0, 0, color);
 
         num_backgroundTiles = 2;
         num_playgroundTiles = 2;
@@ -79,8 +89,8 @@ public class Level
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
             0, 0, 0, 1, 0, 0,
+            0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
         };
 
@@ -99,11 +109,11 @@ public class Level
 
         //Update background tile animations.
         for(int i = 0; i < num_backgroundTiles; i++)
-        {tileAnims[0][i].update(1.0f);}
+        {background_TileAnims[i].update(1.0f);}
 
         //Update playground tile animations.
         for(int i = 0; i < num_playgroundTiles; i++)
-        {tileAnims[1][i].update(1.0f);}
+        {playground_TileAnims[i].update(1.0f);}
     }
 
     /**Render function.*/
@@ -137,30 +147,59 @@ public class Level
 
 
         //
-        //Iterate through all visible tiles and render them.
-        //Bottom to Top, Left to Right.
+        //Iterate through all visible background tiles and render them.
+        //Left to Right, Bottom to Top.
         //
-        for(int y = y1-1; y >= y0; y--)
+        for(int x = x0; x < x1; x++)
         {
-            for(int x = x0; x < x1; x++)
+            for(int y = y1-1; y >= y0; y--)
             {
                 //Get Tile ID.
-                int tileID = getTileID_Unsafe(x, y),
-                a = tileID / 8, slot = tileID % 8;
+                byte tileID = getTileID_Unsafe(x, y);
 
-                //Get and render Tile Animation.
-                Tile t = tileAnims[a][slot];
-                t.render(screen, x << TILE_BITS, y << TILE_BITS, scale);
+                //Get background tile ID.
+                int b = (tileID & 0x0F) - 1;
 
+                if(b >= 0)
+                {
+                    //Get and render Tile Animation.
+                    Tile bt = background_TileAnims[b];
+                    bt.render(screen, x << TILE_BITS, y << TILE_BITS, scale);
+                }
+            }
+        }
 
+        //
+        //Iterate through all playground tiles and render them.
+        //Left to Right, Bottom to Top.
+        //
+        for(int x = x0; x < x1; x++)
+        {
+            for(int y = y1-1; y >= y0; y--)
+            {
                 //Get Entity ID.
-                int entityID = getEntityID(x, y);
+                int entityID = getEntityID_Unsafe(x, y);
 
-                //Nothing case.
-                if(entityID == 0){continue;}
+                if(entityID != 0)
+                {
+                    //Player case.
+                    if(entityID == 1){player.render(screen, x, y, scale);}
+                    continue;
+                }
 
-                //Player case.
-                if(entityID == 1){player.render(screen, x, y, scale);}
+
+                //Get Tile ID.
+                byte tileID = getTileID_Unsafe(x, y);
+
+                //Get playground tile IDs.
+                int p = (((tileID & 0xF0) >> 4) & 0xFF) - 1;
+
+                if(p >= 0)
+                {
+                    //Get and render Tile Animation.
+                    Tile pt = playground_TileAnims[p];
+                    pt.render(screen, x << TILE_BITS, y << TILE_BITS, scale);
+                }
             }
         }
     }
@@ -176,6 +215,20 @@ public class Level
 
         return tiles[x + y * width];
     }
+
+
+    /**Gets the Tile ID at the given Tile point.*/
+    public int getSolidTileID(int x, int y)
+    {
+        if(x < 0 || x >= width || y < 0 || y >= height)
+        {return 0;}
+
+        return ((tiles[x + y * width] & 0xF0) >> 4) & 0xFF;
+    }
+
+
+    /**Gets the Entity ID at the given Tile point without doing an out-of-bounds check.*/
+    public byte getEntityID_Unsafe(int x, int y){return entities[x + y * width];}
 
     /**Gets the Entity ID at the given Tile point.*/
     public byte getEntityID(int x, int y)

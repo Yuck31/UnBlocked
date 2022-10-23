@@ -157,7 +157,7 @@ public class Player extends Entity implements TileRenderable
         */
         anim_idle = Functional_FrameAnimation.load
         (
-            "Player/player_backWalk", playerSprites,
+            "Player/player_idle", playerSprites,
             //
             this::idle,
             //{System.out.println("High Blink");},
@@ -230,9 +230,10 @@ public class Player extends Entity implements TileRenderable
         {
             //If there is a command queued up...
             byte currentCommand = commandBuffer[current_commandIndex];
+            commandBuffer[current_commandIndex] = CMD_NONE;
             if(currentCommand != CMD_NONE)
             {
-                System.out.println(currentCommand);
+                System.out.println(current_commandIndex);
 
                 //Run it.
                 switch(currentCommand)
@@ -240,10 +241,10 @@ public class Player extends Entity implements TileRenderable
                     case CMD_LEFT:
                     {
                         //Check tile to the Player's left.
-                        byte tileID = level.getTileID(tileX-1, tileY);
+                        int tileID = level.getSolidTileID(tileX-1, tileY);
 
                         //If the tile is not solid, move there.
-                        //if(!(tileID >= Tile.SOLID_0 && tileID <= Tile.SOLID_7))
+                        if(tileID == 0)
                         {
                             spriteFlip = Sprite.FLIP_X;
                             spriteRenderer.setFlip(spriteFlip);
@@ -256,27 +257,55 @@ public class Player extends Entity implements TileRenderable
                     case CMD_RIGHT:
                     {
                         //Check tile to the Player's right.
-                        byte tileID = level.getTileID(tileX+1, tileY);
+                        int tileID = level.getSolidTileID(tileX+1, tileY);
 
                         //If the tile is not solid, move there.
-                        //if(!(tileID >= Tile.SOLID_0 && tileID <= Tile.SOLID_7))
+                        if(tileID == 0)
                         {
                             spriteFlip = Sprite.FLIP_NONE;
                             spriteRenderer.setFlip(spriteFlip);
                             tileX++;
-                            System.out.println(position.x);
                             position.x = tileX << Level.TILE_BITS;
                         }
                     }
                     break;
 
                     case CMD_CLIMB:
+                    {
+                        //Check tile to the Player's top.
+                        int tileID = level.getSolidTileID(tileX, tileY-1);
+
+                        //If the tile is not solid, move there.
+                        //if(tileID == 0)
+                        {
+                            tileY--;
+                            position.y = tileY << Level.TILE_BITS;
+                        }
+                    }
                     break;
 
                     case CMD_PICKUP:
+                    {
+                        //Check tile to the Player's bottom.
+                        int tileID = level.getSolidTileID(tileX, tileY+1);
+
+                        //If the tile is not solid, move there.
+                        //if(tileID == 0)
+                        {
+                            tileY++;
+                            position.y = tileY << Level.TILE_BITS;
+                        }
+                    }
                     break;
 
                     case CMD_USE:
+                    {
+
+                        tileX = 3;
+                        tileY = 3;
+                        position.x = tileX << Level.TILE_BITS;
+                        position.y = tileY << Level.TILE_BITS;
+                    }
                     break;
                 }
 

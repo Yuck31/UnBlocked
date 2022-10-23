@@ -924,7 +924,7 @@ public class OpenGLScreen extends Screen
     float position_x1, float position_y1, float position_z1, 
     float position_x2, float position_y2, float position_z2, 
     float position_x3, float position_y3, float position_z3,
-    Vector4f color, Sprite sprite, int wrapFlags, int wrapX, int wrapY, boolean fixed)
+    Vector4f color, Sprite sprite, byte flip, int wrapFlags, int wrapX, int wrapY, boolean fixed)
     {
         //Get SpriteSheet.
         SpriteSheet sheet = sprite.getSheet();
@@ -978,6 +978,20 @@ public class OpenGLScreen extends Screen
             //
             y0 = (sprite.getY() + (((wrapFlags & 0b10) == 0b10) ? 0 : wrapY)) / (float)sheet.getHeight(),
             y1 = (sprite.getY() + (((wrapFlags & 0b10) == 0b10) ? wrapY : sprite.getHeight())) / (float)sheet.getHeight();
+
+            if((flip & Sprite.FLIP_X) == 1)
+            {
+                float bagHolder = x1;
+                x1 = x0;
+                x0 = bagHolder;
+            }
+
+            if((flip & Sprite.FLIP_Y) == 1)
+            {
+                float bagHolder = y1;
+                y1 = y0;
+                y0 = bagHolder;
+            }
 
             //System.out.println("add vertices");
 
@@ -1136,7 +1150,7 @@ public class OpenGLScreen extends Screen
                 x1, y1, 0,
                 x0, y1, 0,
                 //
-                blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
+                blendingColor, sprite, flip, wrapFlags & w, wrapX, wrapY, fixed
             );
         }
     }
@@ -1189,7 +1203,7 @@ public class OpenGLScreen extends Screen
                 x1, y1, 0,
                 x0, y1, 0,
                 //
-                blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
+                blendingColor, sprite, flip, wrapFlags & w, wrapX, wrapY, fixed
             );
         }
     }
@@ -1235,7 +1249,7 @@ public class OpenGLScreen extends Screen
                 x1, y1, 0,
                 x0, y1, 0,
                 //
-                blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
+                blendingColor, sprite, flip, wrapFlags & w, wrapX, wrapY, fixed
             );
         }
     }
@@ -1308,7 +1322,7 @@ public class OpenGLScreen extends Screen
                 x2, y2, 0,
                 x3, y3, 0,
                 //
-                blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
+                blendingColor, sprite, flip, wrapFlags & w, wrapX, wrapY, fixed
             );
         }
     }
@@ -1369,7 +1383,7 @@ public class OpenGLScreen extends Screen
                 x2, y2, 0,
                 x3, y3, 0,
                 //
-                blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
+                blendingColor, sprite, flip, wrapFlags & w, wrapX, wrapY, fixed
             );
         }
     }
@@ -1457,7 +1471,7 @@ public class OpenGLScreen extends Screen
                 x2, y2, 0,
                 x3, y3, 0,
                 //
-                blendingColor, sprite, wrapFlags & w, wrapX, wrapY, fixed
+                blendingColor, sprite, flip, wrapFlags & w, wrapX, wrapY, fixed
             );
         }
     }
@@ -1783,7 +1797,7 @@ public class OpenGLScreen extends Screen
             x2, y2, z2,
             x3, y3, z3,
             //
-            blendingColor, sprite, 0, 0, 0, fixed
+            blendingColor, sprite, flip, 0, 0, 0, fixed
         );
     }
 

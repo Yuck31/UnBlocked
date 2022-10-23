@@ -1,6 +1,7 @@
 Tiles:
-0-7=background0-background7
-8-15=playground0-playground7
+[4 bits playground][4 bits background]
+0-f 0-f
+allowing 16 background and 16 playground tiles in one set.
 
 Entities:
 0=nothing
