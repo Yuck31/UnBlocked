@@ -16,7 +16,6 @@ public class ScaleSpriteRenderer extends SpriteRenderer
     //Scale values for the Sprite.
     private float xScale = 1.0f, yScale = 1.0f;
 
-    
     /**Constructor.*/
     public ScaleSpriteRenderer(Sprite sprite, int xOffset, int yOffset, int zOffset, boolean fixed, boolean canColorBlend)
     {

@@ -1,8 +1,6 @@
 #version 330 core
 
 //Input values from the vertex shader.
-in vec3 frag_Position;
-//in vec4 frag_Crop;
 in vec4 frag_Color;
 in vec2 frag_TexCoords;
 in float frag_TexID;
@@ -22,6 +20,7 @@ void main()
 	//|| gl_FragCoord.y < frag_Crop.y || gl_FragCoord.y > frag_Crop.w)
 	//{
 		outputColor = frag_Color * texture(uTextures[int(frag_TexID)], frag_TexCoords);
+		//outputColor = vec4(1.0, 0.0, 0.0, 1.0);
 
 		//int d0 = int(gl_FragCoord.z * (255)) % 64;
 		//float d1 = float(d0) / 64.0;
@@ -46,6 +45,6 @@ void main()
 		//outputColor = vec4(t1, frag_TexCoords.y, 0.0, 1.0);
 
 		//If clear, skip.
-		if(outputColor.a < 0.01){discard;}
+		//if(outputColor.a < 0.01){discard;}
 	//}
 }

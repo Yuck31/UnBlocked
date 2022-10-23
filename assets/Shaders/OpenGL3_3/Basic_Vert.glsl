@@ -10,7 +10,6 @@ layout(location = 3) in float attrib_TexID;
 uniform mat4 uView;
 
 //Fragment Values.
-out vec3 frag_Position;
 out vec4 frag_Color;
 out vec2 frag_TexCoords;
 out float frag_TexID;
@@ -25,8 +24,9 @@ void main()
     //gl_Position = uView * vec4(attrib_Position.xyz, 1.0);
     gl_Position = uView * vec4(attrib_Position.x, attrib_Position.y, attrib_Position.z, 1.0);
 
+    //gl_Position = vec4(attrib_Position.x, attrib_Position.y, 0.0, 1.0);
+
     //Send all the atrribute data directly to the fragment shader (including position for lighting reasons).
-    frag_Position = attrib_Position;
     frag_Color = attrib_Color;
     frag_TexCoords = attrib_TexCoords;
     frag_TexID = attrib_TexID;

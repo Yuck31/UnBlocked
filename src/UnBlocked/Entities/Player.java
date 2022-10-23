@@ -9,17 +9,23 @@ import org.joml.Vector4f;
 
 import UnBlocked.Controller;
 import UnBlocked.Game;
+import UnBlocked.Level;
+import UnBlocked.Tile;
 import UnBlocked.TileRenderable;
 import UnBlocked.Graphics.Screen;
 import UnBlocked.Graphics.Sprite;
 import UnBlocked.Graphics.SpriteSheet;
 import UnBlocked.Graphics.Sprites;
 import UnBlocked.Graphics.Animations.Functional_FrameAnimation;
+import UnBlocked.Graphics.SpriteRenderer.ScRoSpriteRenderer;
 
 public class Player extends Entity implements TileRenderable
 {
     //Controller Reference.
     private transient Controller controller = Game.controller;
+
+    //SpriteRenderer.
+    private ScRoSpriteRenderer spriteRenderer;
 
     //Sprites.
     protected SpriteSheet playerSheet;
@@ -57,7 +63,7 @@ public class Player extends Entity implements TileRenderable
     anim_zipLine1;
 
     //Command Buffer.
-    public static final byte
+    public static final byte CMD_NONE = 0,
     CMD_LEFT = 1,
     CMD_RIGHT = 2,
     CMD_CLIMB = 3,
@@ -68,6 +74,7 @@ public class Player extends Entity implements TileRenderable
 
     //Action related stuff.
     private boolean inAnAction = false;
+    private byte spriteFlip = Sprite.FLIP_NONE;
     private int idleTimer = 0;
     //public static final int MAX_BLINK_TIME 
 
@@ -150,7 +157,7 @@ public class Player extends Entity implements TileRenderable
         */
         anim_idle = Functional_FrameAnimation.load
         (
-            "player_backWalk", playerSprites,
+            "Player/player_backWalk", playerSprites,
             //
             this::idle,
             //{System.out.println("High Blink");},
@@ -178,8 +185,15 @@ public class Player extends Entity implements TileRenderable
         anim_zipLine0,
         anim_zipLine1;
         */
+
+        spriteRenderer = new ScRoSpriteRenderer(anim_idle.getSprite(0), 0, 0,
+        1.0f, 1.0f, 0.0f, 0, 0, true, false);
     }
 
+    public void init(Level level)
+    {
+        this.level = level;
+    }
 
     @Override
     /**Update function.*/
@@ -188,22 +202,26 @@ public class Player extends Entity implements TileRenderable
         //
         //Get input and add it to queue.
         //
+        getInput();
+        //System.out.println(input_Horizontal);
         byte cmd = 0;
 
         //Vertical Input.
         if(input_Vertical <= -1){cmd = CMD_CLIMB; input_Vertical = 0;}
         else if(input_Vertical >= 1){cmd = CMD_PICKUP; input_Vertical = 0;}
         addCommand(cmd);
+        cmd = CMD_NONE;
         
         //Horizontal Input.
         if(input_Horizontal <= -1){cmd = CMD_LEFT; input_Horizontal = 0;}
         else if(input_Horizontal >= 1){cmd = CMD_RIGHT; input_Horizontal = 0;}
         addCommand(cmd);
+        cmd = CMD_NONE;
 
         //Use input.
         if(input_Use){cmd = CMD_USE;}
         addCommand(cmd);
-
+        cmd = CMD_NONE;
 
         //
         //Idle
@@ -212,15 +230,44 @@ public class Player extends Entity implements TileRenderable
         {
             //If there is a command queued up...
             byte currentCommand = commandBuffer[current_commandIndex];
-            if(currentCommand != 0)
+            if(currentCommand != CMD_NONE)
             {
+                System.out.println(currentCommand);
+
                 //Run it.
                 switch(currentCommand)
                 {
                     case CMD_LEFT:
+                    {
+                        //Check tile to the Player's left.
+                        byte tileID = level.getTileID(tileX-1, tileY);
+
+                        //If the tile is not solid, move there.
+                        //if(!(tileID >= Tile.SOLID_0 && tileID <= Tile.SOLID_7))
+                        {
+                            spriteFlip = Sprite.FLIP_X;
+                            spriteRenderer.setFlip(spriteFlip);
+                            tileX--;
+                            position.x = tileX << Level.TILE_BITS;
+                        }
+                    }
                     break;
 
                     case CMD_RIGHT:
+                    {
+                        //Check tile to the Player's right.
+                        byte tileID = level.getTileID(tileX+1, tileY);
+
+                        //If the tile is not solid, move there.
+                        //if(!(tileID >= Tile.SOLID_0 && tileID <= Tile.SOLID_7))
+                        {
+                            spriteFlip = Sprite.FLIP_NONE;
+                            spriteRenderer.setFlip(spriteFlip);
+                            tileX++;
+                            System.out.println(position.x);
+                            position.x = tileX << Level.TILE_BITS;
+                        }
+                    }
                     break;
 
                     case CMD_CLIMB:
@@ -256,7 +303,7 @@ public class Player extends Entity implements TileRenderable
         {
             commandBuffer[input_commandIndex] = cmd;
             input_commandIndex = (input_commandIndex+1) % commandBuffer.length;
-        } 
+        }
     }
 
     //Inputs.
@@ -272,6 +319,8 @@ public class Player extends Entity implements TileRenderable
         r = controller.inputPressed(0, Controller.action_RIGHT),
         u = controller.inputPressed(0, Controller.action_UP),
         d = controller.inputPressed(0, Controller.action_DOWN);
+
+        //System.out.println(l);
 
         //If D-Pad isn't being used, use control stick instead.
         if(!l && !r && !u && !d)
@@ -329,7 +378,6 @@ public class Player extends Entity implements TileRenderable
     @Override
     public void render(Screen screen, int x, int y, float scale)
     {
-        //screen.render
-        
+        spriteRenderer.render(screen, position, scale);
     }
 }

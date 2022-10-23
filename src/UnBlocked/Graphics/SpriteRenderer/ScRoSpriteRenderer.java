@@ -130,6 +130,10 @@ public class ScRoSpriteRenderer extends SpriteRenderer
     /**Render Function.*/
     public void render(Screen screen, Vector2f position)
     {renderFunction.invoke(screen, position.x, position.y, 0, 1.0f);}
+    
+    /**Render Function.*/
+    public void render(Screen screen, Vector2f position, float scaleOffset)
+    {renderFunction.invoke(screen, position.x, position.y, 0, scaleOffset);}
 
     @Override
     /**Render Function.*/

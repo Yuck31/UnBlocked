@@ -26,7 +26,7 @@ public class LevelCamera
     public LevelCamera(Level level, int width, int height)
     {
         this.level = level;
-        shape = new AAB_Box2D(0, 0, Game.SCREEN_WIDTH, Game.SCREEN_HEIGHT);
+        shape = new AAB_Box2D(width, height, 0, 0);
     }
 
     /**Constructor.*/
@@ -47,7 +47,7 @@ public class LevelCamera
 
             //Check collision with the level boundaries and move accordingly.
             float right = potentialPosition.x + shape.getWidth(),
-            levelWidth = level.getWidth() * Level.TILE_SIZE;
+            levelWidth = level.getWidth() << Level.TILE_BITS;
             
             if(potentialPosition.x < 0)
             {

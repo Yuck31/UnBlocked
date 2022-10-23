@@ -46,6 +46,7 @@ public abstract class SpriteRenderer
     
     /**Sets this SpriteRenderer's blendingColor.*/
     public final void setBlendingColor(float r, float g, float b, float a){blendingColor.set(r, g, b, a);}
+    public final void setBlendingColor(Vector4f color){blendingColor.set(color);}
 
     /**Render Function.*/
     public abstract void render(Screen screen, Vector2f position);

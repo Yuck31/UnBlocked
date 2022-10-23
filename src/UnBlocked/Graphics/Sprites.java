@@ -165,7 +165,7 @@ public class Sprites
         //load(new File(imagesPath + "Global/UI"), global_UI, "");
 
         //Load Entities.
-        //load(new File(imagesPath + "Global/Entities"), global_Entities, "");
+        load(new File(imagesPath + "Entities"), global_Entities, "");
 
         //Load Fonts (since Fonts use SpriteSheets, their sheets need to be stored here and be treated as textures too).
         //load(new File(imagesPath + "Global/Fonts"), global_Fonts, "");
@@ -262,10 +262,13 @@ public class Sprites
     /**Returns a SpriteSheet from the global_Font Sheet Hashmap.*/
     public static SpriteSheet global_FontSheet(String name){return getSheet(global_Fonts, name);}
 
-    /**Loads a TileSheet image from the given path.*/
-    public static SpriteSheet loadTileSet(String path)
+    //Tiles path.
+    public static final String TILES_PATH = "assets/Images/Tiles/";
+
+    /**Loads a Tile SpriteSheet from the given path.*/
+    public static SpriteSheet loadTileSheet(String name)
     {
-        //SpriteSheet sheet = new SpriteSheet(new File(Tiles.TILESETS_PATH + path + ".png"), path);
-        return null;//sheet;
+        SpriteSheet sheet = new SpriteSheet(new File(TILES_PATH + name + ".png"), name);
+        return sheet;
     }
 }

@@ -1,12 +1,19 @@
+Tiles:
 0-7=background0-background7
 8-15=playground0-playground7
-16=player
-17=block (17-23?)
-24-31=water (of diffrent colors)
-32-39=boat (of different designs)
-40-47=telporters (of different bindings and colors)
-48-55=switches (of different bindings and colors)
-56-63=horizontalGates (of different bindings and colors)
-64-71=verticalGates (of different bindings and colors)
-72-79=elevators (of different designs)
-80-87=zipLines (of different designs)
+
+Entities:
+0=nothing
+1=player
+2-4=boat (of different designs)
+5-7=water (of diffrent colors)
+8-15=block (of different types?)
+16-23=telporters (of different bindings and colors)
+24-31=switches (of different bindings and colors)
+32-39=horizontalGates (of different bindings and colors)
+40-47=verticalGates (of different bindings and colors)
+48-55=elevators (of different designs)
+56-63=zipLines (of different designs)
+64-71=
+72-79=
+80-87=

@@ -463,7 +463,7 @@ public class Game
         GL33.glBlendFunc(GL33.GL_SRC_ALPHA, GL33.GL_ONE_MINUS_SRC_ALPHA);
 
         //Set Depth Testsing Function.
-        GL33.glDepthFunc(GL33.GL_LESS);
+        //GL33.glDepthFunc(GL33.GL_LESS);
         //Depth Testing will be switched on and off in the render() function.
 
         //GL33.glEnable(GL33.GL_LINE_SMOOTH);

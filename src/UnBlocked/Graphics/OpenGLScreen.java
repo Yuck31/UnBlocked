@@ -276,6 +276,8 @@ public class OpenGLScreen extends Screen
         /**Sends all stored vertex data in this batch to the GPU for rendering.*/
         public final void render()
         {
+            //System.out.println(numSprites);
+
             //Use Vertex Buffer Object to upload vertices to Shader.
             glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject_ID);
             glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
@@ -606,17 +608,17 @@ public class OpenGLScreen extends Screen
     private List<Circle_RenderBatch> circle_Batches, circle2D_Batches;
 
     //Light Data.
-    private float[] lightData;
-    private int[][] cellData = new int[2][];
-    private int numLights;
+    //private float[] lightData;
+    //private int[][] cellData = new int[2][];
+    //private int numLights;
 
     //Uniform Block Addresses.
-    private int lightsBlock_UBO, cellsBlock0_UBO, cellsBlock1_UBO;
+    //private int lightsBlock_UBO, cellsBlock0_UBO, cellsBlock1_UBO;
 
     //FrameBuffer and RenderBuffer Addresses.
     private int output_FrameBuffer_Object = -1,
-    output_FrameBuffer_Texture = -1, shadow_FrameBuffer_Texture = -1,
-    output_FenderBuffer_Object = -1;
+    output_FrameBuffer_Texture = -1,// shadow_FrameBuffer_Texture = -1,
+    output_RenderBuffer_Object = -1;
 
     //Matricies.
     private Matrix4f projectionMatrix = new Matrix4f(),
@@ -642,7 +644,7 @@ public class OpenGLScreen extends Screen
         projectionMatrix.identity();
         projectionMatrix.ortho(0, w,
         h, 0,
-        -(16.5f * 32f), (16.5f * 32f));
+        -256, 256);
 
         //Custom FrameBuffer, to avoid texture offset problems and improve performance at higher resolutions.
         {
@@ -666,21 +668,24 @@ public class OpenGLScreen extends Screen
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+            //Set FrameBuffer Texture to this frameBuffer.
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, output_FrameBuffer_Texture, 0);
+
 
             //
             //Same with Shadow FrameBuffer Texture.
             //
-            if(shadow_FrameBuffer_Texture == -1){shadow_FrameBuffer_Texture = glGenTextures();}
-            glBindTexture(GL_TEXTURE_2D, shadow_FrameBuffer_Texture);
+            //if(shadow_FrameBuffer_Texture == -1){shadow_FrameBuffer_Texture = glGenTextures();}
+            //glBindTexture(GL_TEXTURE_2D, shadow_FrameBuffer_Texture);
 
             //(Re)Create texture.
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16_SNORM, WIDTH, HEIGHT, 0, GL_RGBA, GL_INT, (int[])null);
+            //glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16_SNORM, WIDTH, HEIGHT, 0, GL_RGBA, GL_INT, (int[])null);
 
             //Set texture parameters.
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
             //Unbind Texture for now.
             glBindTexture(GL_TEXTURE_2D, 0);
@@ -689,14 +694,14 @@ public class OpenGLScreen extends Screen
             //TODO: Use stencil buffer to use Crop Regions.
 
             //RenderBuffer, used as the Depth and Stencil buffers.
-            if(output_FenderBuffer_Object == -1){output_FenderBuffer_Object = glGenRenderbuffers();}
-            glBindRenderbuffer(GL_RENDERBUFFER, output_FenderBuffer_Object);
+            if(output_RenderBuffer_Object == -1){output_RenderBuffer_Object = glGenRenderbuffers();}
+            glBindRenderbuffer(GL_RENDERBUFFER, output_RenderBuffer_Object);
 
             //What is the RenderBuffer used for?
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, output_FenderBuffer_Object);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, output_RenderBuffer_Object);
             //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
-            //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, output_FenderBuffer_Object);
+            //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, output_RenderBuffer_Object);
             glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
             //Completion check for debugging purposes.
@@ -768,6 +773,10 @@ public class OpenGLScreen extends Screen
 
 
 
+        
+
+
+
         //
         //Compile Line Shader.
         //
@@ -789,19 +798,19 @@ public class OpenGLScreen extends Screen
     }
 
 
-    private float[] offsets_Array = new float[3];
+    //private float[] offsets_Array = new float[3];
 
     public void render(long windowAddress)
     {
         //Calculate View Matrix.
-        projectionMatrix.translate(-xOffset, -yOffset, 1, viewMatrix);
+        projectionMatrix.translate(-xOffset, -yOffset, 0, viewMatrix);
         viewMatrix.get(matrixArray);
 
         //Use custom FrameBuffer and set viewport to fixed size.
-        //glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer_Object);
+        //glBindFramebuffer(GL_FRAMEBUFFER, output_FrameBuffer_Object);
         glViewport(0, 0, WIDTH, HEIGHT);
 
-        glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_DEPTH_TEST);
 
 
         //
@@ -1340,17 +1349,17 @@ public class OpenGLScreen extends Screen
         for(int w = 0b00; w <= wrapFlags; w += wrapInc)
         {
             float
-            x0 = (((0b01 & w) == 0b01) ? ((wx * cos) + (wy * -sin)) : 0) - oX,//((0 * cos) + (0 * -sin)) - oX,
-            y0 = (((0b10 & w) == 0b10) ? ((wx * sin) + (wy * cos)) : 0) - oY,//((0 * sin) + (0 * cos)) - oY,
+            x0 = xPos + (((0b01 & w) == 0b01) ? ((wx * cos) + (wy * -sin)) : 0) - oX,//((0 * cos) + (0 * -sin)) - oX,
+            y0 = yPos + (((0b10 & w) == 0b10) ? ((wx * sin) + (wy * cos)) : 0) - oY,//((0 * sin) + (0 * cos)) - oY,
             //
-            x1 = (((0b01 & w) == 0b01) ? ((sprite_width * cos) + (wy * -sin)) : (wx * cos)) - oX,//((wx * cos) + (0 * -sin))) - oX,
-            y1 = (((0b10 & w) == 0b10) ? ((sprite_width * sin) + (wy * cos)) : (wx * sin)) - oY,//((wx * sin) + (0 * cos))) - oY,
+            x1 = xPos + (((0b01 & w) == 0b01) ? ((sprite_width * cos) + (wy * -sin)) : (wx * cos)) - oX,//((wx * cos) + (0 * -sin))) - oX,
+            y1 = yPos + (((0b10 & w) == 0b10) ? ((sprite_width * sin) + (wy * cos)) : (wx * sin)) - oY,//((wx * sin) + (0 * cos))) - oY,
             //
-            x2 = (((0b01 & w) == 0b01) ? ((sprite_width * cos) + (sprite_height * -sin)) : ((wx * cos) + (wy * -sin))) - oX,
-            y2 = (((0b10 & w) == 0b10) ? ((sprite_width * sin) + (sprite_height * cos)) : ((wx * sin) + (wy * cos))) - oY,
+            x2 = xPos + (((0b01 & w) == 0b01) ? ((sprite_width * cos) + (sprite_height * -sin)) : ((wx * cos) + (wy * -sin))) - oX,
+            y2 = yPos + (((0b10 & w) == 0b10) ? ((sprite_width * sin) + (sprite_height * cos)) : ((wx * sin) + (wy * cos))) - oY,
             //
-            x3 = (((0b01 & w) == 0b01) ? ((wx * cos) + (sprite_height * -sin)) : (wy * -sin)) - oX,//((0 * cos) + (wy * -sin))) - oX,
-            y3 = (((0b10 & w) == 0b10) ? ((wx * sin) + (sprite_height * cos)) : (wy * cos)) - oY;//((0 * sin) + (wy * cos))) - oY;
+            x3 = xPos + (((0b01 & w) == 0b01) ? ((wx * cos) + (sprite_height * -sin)) : (wy * -sin)) - oX,//((0 * cos) + (wy * -sin))) - oX,
+            y3 = yPos + (((0b10 & w) == 0b10) ? ((wx * sin) + (sprite_height * cos)) : (wy * cos)) - oY;//((0 * sin) + (wy * cos))) - oY;
 
             //Pass the data to a RenderBatch.
             add_basic
@@ -1428,17 +1437,17 @@ public class OpenGLScreen extends Screen
         for(int w = 0b00; w <= wrapFlags; w += wrapInc)
         {
             float
-            x0 = (((0b01 & w) == 0b01) ? ((wx * cos) + (wy * -sin)) : 0) - oX,//((0 * cos) + (0 * -sin)) - oX,
-            y0 = (((0b10 & w) == 0b10) ? ((wx * sin) + (wy * cos)) : 0) - oY,//((0 * sin) + (0 * cos)) - oY,
+            x0 = xPos + (((0b01 & w) == 0b01) ? ((wx * cos) + (wy * -sin)) : 0) - oX,//((0 * cos) + (0 * -sin)) - oX,
+            y0 = yPos + (((0b10 & w) == 0b10) ? ((wx * sin) + (wy * cos)) : 0) - oY,//((0 * sin) + (0 * cos)) - oY,
             //
-            x1 = (((0b01 & w) == 0b01) ? ((resultWidth * cos) + (wy * -sin)) : (wx * cos)) - oX,//((wx * cos) + (0 * -sin))) - oX,
-            y1 = (((0b10 & w) == 0b10) ? ((resultWidth * sin) + (wy * cos)) : (wx * sin)) - oY,//((wx * sin) + (0 * cos))) - oY,
+            x1 = xPos + (((0b01 & w) == 0b01) ? ((resultWidth * cos) + (wy * -sin)) : (wx * cos)) - oX,//((wx * cos) + (0 * -sin))) - oX,
+            y1 = yPos + (((0b10 & w) == 0b10) ? ((resultWidth * sin) + (wy * cos)) : (wx * sin)) - oY,//((wx * sin) + (0 * cos))) - oY,
             //
-            x2 = (((0b01 & w) == 0b01) ? ((resultWidth * cos) + (resultHeight * -sin)) : ((wx * cos) + (wy * -sin))) - oX,
-            y2 = (((0b10 & w) == 0b10) ? ((resultWidth * sin) + (resultHeight * cos)) : ((wx * sin) + (wy * cos))) - oY,
+            x2 = xPos + (((0b01 & w) == 0b01) ? ((resultWidth * cos) + (resultHeight * -sin)) : ((wx * cos) + (wy * -sin))) - oX,
+            y2 = yPos + (((0b10 & w) == 0b10) ? ((resultWidth * sin) + (resultHeight * cos)) : ((wx * sin) + (wy * cos))) - oY,
             //
-            x3 = (((0b01 & w) == 0b01) ? ((wx * cos) + (resultHeight * -sin)) : (wy * -sin)) - oX,//((0 * cos) + (wy * -sin))) - oX,
-            y3 = (((0b10 & w) == 0b10) ? ((wx * sin) + (resultHeight * cos)) : (wy * cos)) - oY;//((0 * sin) + (wy * cos))) - oY;
+            x3 = xPos + (((0b01 & w) == 0b01) ? ((wx * cos) + (resultHeight * -sin)) : (wy * -sin)) - oX,//((0 * cos) + (wy * -sin))) - oX,
+            y3 = yPos + (((0b10 & w) == 0b10) ? ((wx * sin) + (resultHeight * cos)) : (wy * cos)) - oY;//((0 * sin) + (wy * cos))) - oY;
 
             //Pass the data to a RenderBatch.
             add_basic

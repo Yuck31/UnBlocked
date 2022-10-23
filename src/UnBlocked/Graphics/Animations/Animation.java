@@ -3,7 +3,7 @@ package UnBlocked.Graphics.Animations;
  * Animates a series of Sprites
  * 
  * Author: Luke Sullivan
- * Last Edit: 3/15/2022
+ * Last Edit: 10/18/2022
  */
 import UnBlocked.Graphics.Sprite;
 

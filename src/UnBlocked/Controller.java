@@ -42,7 +42,7 @@ public class Controller
 
 
     //ID Numbers for all the different actions a key can be bound to
-    public transient static final byte MAX_ACTIONS = 11,
+    public transient static final byte MAX_ACTIONS = 5,
     action_UP = 0,
     action_DOWN = 1,
     action_LEFT = 2,
@@ -97,6 +97,12 @@ public class Controller
     {
         for(int i = 0; i < controllerStates.length; i++)
         {controllerStates[i] = GLFWGamepadState.calloc();}
+
+        gameKeys[0][0] = GLFW_KEY_W;
+        gameKeys[0][1] = GLFW_KEY_S;
+        gameKeys[0][2] = GLFW_KEY_A;
+        gameKeys[0][3] = GLFW_KEY_D;
+        gameKeys[0][4] = GLFW_KEY_F;
 
         //checkForControllers();
     }
