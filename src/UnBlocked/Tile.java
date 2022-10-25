@@ -11,10 +11,6 @@ import UnBlocked.Graphics.SpriteRenderer.ScaleSpriteRenderer;
 
 public class Tile implements TileRenderable
 {
-    public static final byte
-    SOLID_0 = 8,
-    SOLID_7 = 15;
-    
     //Animation.
     private FrameAnimation animation;
 
@@ -53,7 +49,9 @@ public class Tile implements TileRenderable
     /**Renders this tile.*/
     public void render(Screen screen, int x, int y, float scale)
     {
+        //screen.fillRect(x, y, Level.TILE_SIZE, Level.TILE_SIZE, Screen.DEFAULT_BLEND, false);
+
         //Render the currently set Sprite.
-        spriteRenderer.render(screen, x, y, 0.0f, scale);
+        spriteRenderer.render(screen, x, y-4, 0.0f, scale);
     }
 }

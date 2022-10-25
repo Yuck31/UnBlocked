@@ -19,7 +19,7 @@ import UnBlocked.Graphics.SpriteRenderer.SpriteRenderer;
 public class Functional_FrameAnimation extends Animation
 {
     @FunctionalInterface
-    public interface Action{public abstract void perform(float timeMod);}
+    public interface Action{public abstract void perform(float timeMod, byte loopStatus);}
     public static final void doNothing(float timeMod){return;}
 
     //Timer.
@@ -153,7 +153,7 @@ public class Functional_FrameAnimation extends Animation
         spriteRenderer.setOffset(offsets[frame][0], offsets[frame][1]);
 
         //Perform Action.
-        actions[actionNumbers[frame]].perform(timeMod);
+        actions[actionNumbers[frame]].perform(timeMod, timer.getLoopStatus());
 
         //Return frame.
         return frame;

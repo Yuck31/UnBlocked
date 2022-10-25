@@ -16,7 +16,24 @@ public abstract class Entity
     protected int tileX, tileY;
 
     /**Constructor.*/
-    public Entity(int tileX, int tileY)
+    public Entity(int tileX, int tileY){setTilePosition(tileX, tileY);}
+
+    //
+    //Position setters.
+    //
+    public final void setTileX(int tileX, int tileY)
+    {
+        this.tileX = tileX;
+        position.x = tileX << Level.TILE_BITS;
+    }
+
+    public final void setTileY(int tileY)
+    {
+        this.tileY = tileY;
+        position.y = tileY << Level.TILE_BITS;
+    }
+
+    public final void setTilePosition(int tileX, int tileY)
     {
         this.tileX = tileX;
         this.tileY = tileY;

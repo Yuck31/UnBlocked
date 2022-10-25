@@ -13,7 +13,12 @@ public class FrameAnimation_Timer
     private final float[] rates;
 
     //Loop Stuff.
-    private boolean doesLoop = false, hasLooped = false;
+    private boolean doesLoop = false;
+    public static final byte
+    PLAYING = 0,
+    HAS_LOOPED = 1,
+    HAS_ENDED = 2;
+    private byte loopStatus = PLAYING;
     private int loopTo = -1;
 
     //Has a frame advanced?
@@ -78,9 +83,13 @@ public class FrameAnimation_Timer
                     if(doesLoop)
                     {
                         frame = loopTo;
-                        hasLooped = true;
+                        loopStatus = HAS_LOOPED;
                     }
-                    else{frame = rates.length-1;}
+                    else
+                    {
+                        frame = rates.length-1;
+                        loopStatus = HAS_ENDED;
+                    }
                 }
             }
         }
@@ -95,12 +104,12 @@ public class FrameAnimation_Timer
                 frame--;
                 frameAdvanced = true;
 
-                if((hasLooped && frame < loopTo) || frame < 0)
+                if((loopStatus == HAS_LOOPED && frame < loopTo) || frame < 0)
                 {
                     if(doesLoop)
                     {
                         frame = rates.length-1;
-                        hasLooped = true;
+                        loopStatus = HAS_LOOPED;
                     }
                     else{frame = rates.length-1;}
                 }
@@ -121,6 +130,11 @@ public class FrameAnimation_Timer
     //LoopTo Getter.
     public int getLoopTo(){return loopTo;}
 
+    //Loop Status.
+    public byte getLoopStatus(){return loopStatus;}
+    public boolean hasEnded(){return loopStatus == HAS_ENDED;}
+
+    //Has Frame Advanced.
     public final boolean hasFrameAdvanced(){return frameAdvanced;}
     
     /**Resets this timer.*/
@@ -128,6 +142,6 @@ public class FrameAnimation_Timer
     {
         frame = 0;
         time = 0;
-        hasLooped = false;
+        loopStatus = PLAYING;
     }
 }

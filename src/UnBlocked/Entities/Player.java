@@ -4,6 +4,7 @@ package UnBlocked.Entities;
  */
 import static org.lwjgl.glfw.GLFW.*;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -16,6 +17,7 @@ import UnBlocked.Graphics.Screen;
 import UnBlocked.Graphics.Sprite;
 import UnBlocked.Graphics.SpriteSheet;
 import UnBlocked.Graphics.Sprites;
+import UnBlocked.Graphics.Animations.FrameAnimation_Timer;
 import UnBlocked.Graphics.Animations.Functional_FrameAnimation;
 import UnBlocked.Graphics.SpriteRenderer.ScRoSpriteRenderer;
 
@@ -23,6 +25,9 @@ public class Player extends Entity implements TileRenderable
 {
     //Controller Reference.
     private transient Controller controller = Game.controller;
+
+    //Target position.
+    private Vector2f targetPosition = new Vector2f();
 
     //SpriteRenderer.
     private ScRoSpriteRenderer spriteRenderer;
@@ -45,9 +50,9 @@ public class Player extends Entity implements TileRenderable
     anim_holdClimb,
     anim_holdDropLand,
     anim_holdFallLand,
-    anim_holdIdleLook,
-    anim_holdRun0,
-    anim_holdRun1,
+    anim_holdIdleLook;
+    private Functional_FrameAnimation[] anim_holdRun = new Functional_FrameAnimation[2];
+    private Functional_FrameAnimation
     anim_idle,
     anim_idleLook,
     anim_idleSDeck0,
@@ -55,12 +60,14 @@ public class Player extends Entity implements TileRenderable
     anim_idleSleep,
     anim_idleWake,
     anim_idleYawn,
-    anim_pickUp,
-    anim_run0,
-    anim_run1,
+    anim_pickUp;
+    private Functional_FrameAnimation[] anim_run = new Functional_FrameAnimation[2];
+    private Functional_FrameAnimation
     anim_spinJump,
     anim_zipLine0,
     anim_zipLine1;
+
+    private Functional_FrameAnimation currentAnim = null;
 
     //Command Buffer.
     public static final byte CMD_NONE = 0,
@@ -71,12 +78,17 @@ public class Player extends Entity implements TileRenderable
     CMD_USE = 5;
     private int input_commandIndex = 0, current_commandIndex = input_commandIndex;
     private byte[] commandBuffer = new byte[128];
+    private byte currentCommand = CMD_NONE;
 
     //Action related stuff.
     private boolean inAnAction = false;
     private byte spriteFlip = Sprite.FLIP_NONE;
-    private int idleTimer = 0;
-    //public static final int MAX_BLINK_TIME 
+
+    public static final int MAX_BLINK_TIME = 200, MAX_BLINK_DURATION = 10;
+    private int idleTimer = MAX_BLINK_DURATION + 1;
+    private byte blinkX, blinkY;
+
+    private byte currentFoot = 0;
 
     /**Constructor.*/
     public Player(int x, int y)
@@ -99,51 +111,51 @@ public class Player extends Entity implements TileRenderable
         (
             "Player/player_climb0", playerSprites,
             //
-            (timeMod) -> {return;}
+            this::doNothing
         );
         anim_climb1 = Functional_FrameAnimation.load
         (
             "Player/player_climb1", playerSprites,
             //
-            (timeMod) -> {return;}
+            this::doNothing
         );
         //
         anim_dropLand = Functional_FrameAnimation.load
         (
             "Player/player_dropLand", playerSprites,
             //
-            (timeMod) -> {return;}
+            this::doNothing
         );
         anim_fall = Functional_FrameAnimation.load
         (
             "Player/player_fall", playerSprites,
             //
-            (timeMod) -> {return;}
+            this::doNothing
         );
         anim_fallLand = Functional_FrameAnimation.load
         (
             "Player/player_fallLand", playerSprites,
             //
-            (timeMod) -> {return;}
+            this::doNothing
         );
         //
         anim_holdClimb = Functional_FrameAnimation.load
         (
             "Player/player_holdClimb", playerSprites,
             //
-            (timeMod) -> {return;}
+            this::doNothing
         );
         anim_holdDropLand = Functional_FrameAnimation.load
         (
             "Player/player_holdDropLand", playerSprites,
             //
-            (timeMod) -> {return;}
+            (timeMod, loopStatus) -> {return;}
         );
         anim_holdFallLand = Functional_FrameAnimation.load
         (
             "Player/player_holdFallLand", playerSprites,
             //
-            (timeMod) -> {return;}
+            this::doNothing
         );
         //
         anim_holdIdleLook = Functional_FrameAnimation.load
@@ -151,10 +163,22 @@ public class Player extends Entity implements TileRenderable
             "Player/player_holdIdleLook", playerSprites,
             this::doNothing
         );
-        /*
-        anim_holdRun0,
-        anim_holdRun1,
-        */
+        //
+        anim_holdRun[0] = Functional_FrameAnimation.load
+        (
+            "Player/player_holdRun0", playerSprites,
+            this::run,
+            this::run,
+            this::run
+        );
+        anim_holdRun[1] = Functional_FrameAnimation.load
+        (
+            "Player/player_holdRun1", playerSprites,
+            this::run,
+            this::run,
+            this::run
+        );
+        //
         anim_idle = Functional_FrameAnimation.load
         (
             "Player/player_idle", playerSprites,
@@ -179,8 +203,22 @@ public class Player extends Entity implements TileRenderable
         anim_idleWake,
         anim_idleYawn,
         anim_pickUp,
-        anim_run0,
-        anim_run1,
+        */
+        anim_run[0] = Functional_FrameAnimation.load
+        (
+            "Player/player_run0", playerSprites,
+            this::run,
+            this::run,
+            this::run
+        );
+        anim_run[1] = Functional_FrameAnimation.load
+        (
+            "Player/player_run1", playerSprites,
+            this::run,
+            this::run,
+            this::run
+        );
+        /*
         anim_spinJump,
         anim_zipLine0,
         anim_zipLine1;
@@ -188,6 +226,8 @@ public class Player extends Entity implements TileRenderable
 
         spriteRenderer = new ScRoSpriteRenderer(anim_idle.getSprite(0), 0, 0,
         1.0f, 1.0f, 0.0f, 0, 0, true, false);
+
+        currentAnim = anim_idle;
     }
 
     public void init(Level level)
@@ -228,12 +268,20 @@ public class Player extends Entity implements TileRenderable
         //
         if(!inAnAction)
         {
-            //If there is a command queued up...
-            byte currentCommand = commandBuffer[current_commandIndex];
+            //Last command check for animation purposes.
+            boolean actionMade = currentCommand != CMD_NONE;
+
+            //Get current command.
+            this.currentCommand = commandBuffer[current_commandIndex];
             commandBuffer[current_commandIndex] = CMD_NONE;
-            if(currentCommand != CMD_NONE)
+
+            //If there was a command queued up...
+            if(this.currentCommand != CMD_NONE)
             {
-                System.out.println(current_commandIndex);
+                inAnAction = true;
+                idleTimer = 0;
+
+                //System.out.println(current_commandIndex);
 
                 //Run it.
                 switch(currentCommand)
@@ -246,26 +294,46 @@ public class Player extends Entity implements TileRenderable
                         //If the tile is not solid, move there.
                         if(tileID == 0)
                         {
+                            //Set sprite flip.
                             spriteFlip = Sprite.FLIP_X;
                             spriteRenderer.setFlip(spriteFlip);
-                            tileX--;
-                            position.x = tileX << Level.TILE_BITS;
+
+                            //Set animation.
+                            currentAnim = anim_run[currentFoot];
+
+                            //Set Target Position.
+                            targetPosition.x = (tileX-1) << Level.TILE_BITS;
+                        }
+                        //Otherwise, bonk into it.
+                        else
+                        {
+                            inAnAction = false;
                         }
                     }
                     break;
 
                     case CMD_RIGHT:
                     {
-                        //Check tile to the Player's right.
+                        //Check tile to the Player's left.
                         int tileID = level.getSolidTileID(tileX+1, tileY);
 
                         //If the tile is not solid, move there.
                         if(tileID == 0)
                         {
+                            //Set sprite flip.
                             spriteFlip = Sprite.FLIP_NONE;
                             spriteRenderer.setFlip(spriteFlip);
-                            tileX++;
-                            position.x = tileX << Level.TILE_BITS;
+
+                            //Set animation.
+                            currentAnim = anim_run[currentFoot];
+
+                            //Set Target Position.
+                            targetPosition.x = (tileX+1) << Level.TILE_BITS;
+                        }
+                        //Otherwise, bonk into it.
+                        else
+                        {
+                            inAnAction = false;
                         }
                     }
                     break;
@@ -276,11 +344,14 @@ public class Player extends Entity implements TileRenderable
                         int tileID = level.getSolidTileID(tileX, tileY-1);
 
                         //If the tile is not solid, move there.
-                        //if(tileID == 0)
+                        if(tileID == 0)
                         {
+                            level.setPlayerPosition(tileX, tileY, tileX, tileY-1);
                             tileY--;
                             position.y = tileY << Level.TILE_BITS;
                         }
+
+                        inAnAction = false;
                     }
                     break;
 
@@ -290,21 +361,26 @@ public class Player extends Entity implements TileRenderable
                         int tileID = level.getSolidTileID(tileX, tileY+1);
 
                         //If the tile is not solid, move there.
-                        //if(tileID == 0)
+                        if(tileID == 0)
                         {
+                            level.setPlayerPosition(tileX, tileY, tileX, tileY+1);
                             tileY++;
                             position.y = tileY << Level.TILE_BITS;
                         }
+
+                        inAnAction = false;
                     }
                     break;
 
                     case CMD_USE:
                     {
-
+                        level.setPlayerPosition(tileX, tileY, 3, 3);
                         tileX = 3;
                         tileY = 3;
                         position.x = tileX << Level.TILE_BITS;
                         position.y = tileY << Level.TILE_BITS;
+
+                        inAnAction = false;
                     }
                     break;
                 }
@@ -316,13 +392,20 @@ public class Player extends Entity implements TileRenderable
             //Otherwise, Idle animations.
             else
             {
-
+                if(actionMade){currentAnim = anim_idle;}
+                idleTimer++;
+                //anim_idle.update(timeMod, spriteRenderer);
+                //spriteRenderer.setSprite(Sprites.flatSprite);
             }
         }
 
         //
         //Running Commands.
         //
+        //else
+        //{
+            currentAnim.update(timeMod, spriteRenderer);
+        //}
     }
 
     /**Adds a command to the command buffer.*/
@@ -386,27 +469,72 @@ public class Player extends Entity implements TileRenderable
         input_Use = controller.inputPressed(0, Controller.action_USE);
     }
 
-    public void doNothing(float timeMod){return;}
+    public void doNothing(float timeMod, byte loopStatus){return;}
 
-    public void backStep(float timeMod)
+    public void backStep(float timeMod, byte loopStatus)
     {
 
     }
 
-    public void idle(float timeMod)
+    public void idle(float timeMod, byte loopStatus)
     {
 
     }
 
-    public void idle_breathe(float timeMod)
+    public void idle_breathe(float timeMod, byte loopStatus)
     {
 
     }
 
+    private static float runX = 1.125f;
+    public void run(float timeMod, byte loopStatus)
+    {
+        switch(currentCommand)
+        {
+            case CMD_LEFT:
+            {
+                if(position.x - runX <= targetPosition.x && loopStatus == FrameAnimation_Timer.HAS_ENDED)
+                {
+                    setTilePosition(tileX-1, tileY);
+                    currentAnim.resetAnim();
+                    inAnAction = false;
+                    currentFoot = (byte)((currentFoot+1) % 2);
+                }
+                else{position.x -= runX;}
+            }
+            break;
+
+            case CMD_RIGHT:
+            {
+                if(position.x + runX >= targetPosition.x && loopStatus == FrameAnimation_Timer.HAS_ENDED)
+                {
+                    setTilePosition(tileX+1, tileY);
+                    currentAnim.resetAnim();
+                    inAnAction = false;
+                    currentFoot = (byte)((currentFoot+1) % 2);
+                }
+                else{position.x += runX;}
+            }
+            break;
+        }
+    }
+
+
+    Vector4f color = new Vector4f(0.0f, 0.5f, 0.5f, 1.0f);
 
     @Override
     public void render(Screen screen, int x, int y, float scale)
     {
+        screen.fillRect(tileX << Level.TILE_BITS, tileY << Level.TILE_BITS, Level.TILE_SIZE, Level.TILE_SIZE, color, true);
+
+        //Render main sprite.
         spriteRenderer.render(screen, position, scale);
+
+        //If blinking, render blink.
+        if(idleTimer % MAX_BLINK_TIME <= MAX_BLINK_DURATION)
+        {
+
+        }
+        //screen.renderSprite_Sc
     }
 }

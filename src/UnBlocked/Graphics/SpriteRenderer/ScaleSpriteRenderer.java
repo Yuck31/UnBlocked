@@ -60,7 +60,7 @@ public class ScaleSpriteRenderer extends SpriteRenderer
         screen.renderSprite_Sc
         (
             (int)((x + offset.x) * scaleOffset),
-            (int)((y + offset.y + sprite.getHeight()) * scaleOffset),
+            (int)((y + offset.y) * scaleOffset),
             (int)(z),
             sprite, flip, 0, 0, xs, ys, fixed
         );

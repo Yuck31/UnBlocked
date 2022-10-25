@@ -17,7 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import UnBlocked.Game;
-import UnBlocked.Main;
+//import UnBlocked.Main;
 
 public class SpriteSheet
 {
@@ -296,16 +296,19 @@ public class SpriteSheet
     private static int doNothing(SpriteSheet sheet){return 0;}
 
     /**For the Software Renderer.*/
-    private static int softwareLoad(SpriteSheet sheet)
-    {
+    //private static int softwareLoad(SpriteSheet sheet)
+    //{
         //return glGenTextures();
-        return 0;
-    }
+        //return 0;
+    //}
 
     /**For the OpenGL Renderer.*/
     private static int openGLLoad(SpriteSheet sheet)
     {
         int result = GL33.glGenTextures();
+
+        //if(sheet.getWidth() <= 1 && sheet.getHeight() <= 1)
+        //{System.out.println("Tex: " + result);}
 
         //System.out.println(result);
         //if(result == 0){System.out.println(GL33.glGetError());}
@@ -335,10 +338,10 @@ public class SpriteSheet
     }
 
     /**For the Vulkan Renderer.*/
-    private static int vulkanLoad(SpriteSheet sheet)
-    {
-        return 0;
-    }
+    //private static int vulkanLoad(SpriteSheet sheet)
+    //{
+        //return 0;
+    //}
 
     /*
      * Functional Interface for deleting textures.
@@ -350,12 +353,10 @@ public class SpriteSheet
         public abstract void invoke(SpriteSheet sheet);
     }
 
-    private static void softwareDelete(SpriteSheet sheet)
-    {sheet.pixels = null;}
+    //private static void softwareDelete(SpriteSheet sheet){sheet.pixels = null;}
 
     private static void openGLDelete(SpriteSheet sheet)
     {GL33.glDeleteTextures(sheet.getID());}
 
-    private static void vulkanDelete(SpriteSheet sheet)
-    {}
+    //private static void vulkanDelete(SpriteSheet sheet){}
 }

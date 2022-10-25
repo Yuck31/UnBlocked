@@ -158,6 +158,11 @@ public class Sprites
         //This function will only work ONCE.
         if(loaded){return;}
 
+        //Run the load function on all of the default sheets.
+        nullSheet.load();
+        whiteSheet.load();
+        flatSheet.load();
+
         //Load Debug Sprites.
         //load(new File(imagesPath + "Global/Debug"), global_Debug, "");
 
@@ -184,7 +189,7 @@ public class Sprites
         //If Sprites were loaded without a Graphics API Initialized.
         if(loaded)
         {
-            //Run the load function on all of the default sheets.
+            //Run the load function on all of the default sheets now that a function is set.
             nullSheet.load();
             whiteSheet.load();
             flatSheet.load();

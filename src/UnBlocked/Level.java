@@ -180,10 +180,12 @@ public class Level
                 //Get Entity ID.
                 int entityID = getEntityID_Unsafe(x, y);
 
+                int tx = x << TILE_BITS, ty = y << TILE_BITS;
+
                 if(entityID != 0)
                 {
                     //Player case.
-                    if(entityID == 1){player.render(screen, x, y, scale);}
+                    if(entityID == 1){player.render(screen, tx, ty, scale);}
                     continue;
                 }
 
@@ -198,7 +200,7 @@ public class Level
                 {
                     //Get and render Tile Animation.
                     Tile pt = playground_TileAnims[p];
-                    pt.render(screen, x << TILE_BITS, y << TILE_BITS, scale);
+                    pt.render(screen, tx, ty, scale);
                 }
             }
         }
@@ -237,5 +239,16 @@ public class Level
         {return 0;}
 
         return entities[x + y * width];
+    }
+
+
+    /**Gets the Entity ID at the given Tile point.*/
+    public void setPlayerPosition(int oldX, int oldY, int x, int y)
+    {
+        if(x < 0 || x >= width || y < 0 || y >= height)
+        {return;}
+
+        entities[oldX + oldY * width] = 0;
+        entities[x + y * width] = 1;
     }
 }

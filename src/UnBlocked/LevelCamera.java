@@ -61,7 +61,7 @@ public class LevelCamera
             }
 
             //NOW set the actual position.
-            position.set(potentialPosition);
+            //position.set(potentialPosition);
         }
     }
 
