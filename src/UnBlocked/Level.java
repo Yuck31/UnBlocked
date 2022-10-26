@@ -54,19 +54,22 @@ public class Level
         this.camera = new LevelCamera(this);
 
         //Set dimensions.
-        this.width = 6;
-        this.height = 6;
+        this.width = 12;
+        this.height = 8;
 
         //Set tiles.
-        this.tiles = intArrayToByteArrayCast(
+        this.tiles = intArrayToByteArrayCast
+        (
             new int[]
             {
-                0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
-                0x20, 0x01, 0x02, 0x02, 0x01, 0x20,
-                0x20, 0x01, 0x02, 0x02, 0x01, 0x20,
-                0x20, 0x01, 0x02, 0x02, 0x01, 0x20,
-                0x20, 0x01, 0x02, 0x02, 0x01, 0x20,
-                0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+                0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+                0x20, 0x01, 0x02, 0x02, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x01, 0x20,
+                0x20, 0x01, 0x02, 0x02, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x01, 0x20,
+                0x20, 0x01, 0x02, 0x02, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x01, 0x20,
+                0x20, 0x01, 0x02, 0x02, 0x01, 0x00, 0x01, 0x01, 0x02, 0x02, 0x01, 0x20,
+                0x20, 0x01, 0x02, 0x02, 0x01, 0x10, 0x01, 0x01, 0x02, 0x02, 0x01, 0x20,
+                0x20, 0x01, 0x02, 0x02, 0x10, 0x10, 0x10, 0x01, 0x02, 0x02, 0x01, 0x20,
+                0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
             }
         );
 
@@ -86,20 +89,45 @@ public class Level
         //Set entities.
         this.entities = new byte[]
         {
-            0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
-            0, 0, 0, 1, 0, 0,
-            0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         };
-
-        player = new Player(3, 3);
-        player.init(this);
+        loadEntities();
+        camera.setEntityPosition(player.getPosition());
     }
 
     public int getWidth(){return width;}
     public int getHeight(){return height;}
+
+
+    private void loadEntities()
+    {
+        for(int y = 0; y < height; y++)
+        {
+            for(int x = 0; x < width; x++)
+            {
+                byte entityID = entities[x + y * width];
+
+                switch(entityID)
+                {
+                    case 1:
+                    player = new Player(x, y);
+                    player.init(this);
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+        }
+    }
+
     
     /**Update function.*/
     public void update()
@@ -150,9 +178,9 @@ public class Level
         //Iterate through all visible background tiles and render them.
         //Left to Right, Bottom to Top.
         //
-        for(int x = x0; x < x1; x++)
+        for(int y = y1-1; y >= y0; y--)
         {
-            for(int y = y1-1; y >= y0; y--)
+            for(int x = x0; x < x1; x++)
             {
                 //Get Tile ID.
                 byte tileID = getTileID_Unsafe(x, y);
@@ -173,9 +201,9 @@ public class Level
         //Iterate through all playground tiles and render them.
         //Left to Right, Bottom to Top.
         //
-        for(int x = x0; x < x1; x++)
+        for(int y = y1-1; y >= y0; y--)
         {
-            for(int y = y1-1; y >= y0; y--)
+            for(int x = x0; x < x1; x++)
             {
                 //Get Entity ID.
                 int entityID = getEntityID_Unsafe(x, y);
@@ -245,10 +273,10 @@ public class Level
     /**Gets the Entity ID at the given Tile point.*/
     public void setPlayerPosition(int oldX, int oldY, int x, int y)
     {
-        if(x < 0 || x >= width || y < 0 || y >= height)
-        {return;}
+        if(!(oldX < 0 || oldX >= width || oldY < 0 || oldY >= height))
+        {entities[oldX + oldY * width] = 0;}
 
-        entities[oldX + oldY * width] = 0;
-        entities[x + y * width] = 1;
+        if(!(x < 0 || x >= width || y < 0 || y >= height))
+        {entities[x + y * width] = 1;}
     }
 }

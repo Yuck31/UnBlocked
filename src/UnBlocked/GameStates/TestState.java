@@ -72,7 +72,7 @@ public class TestState extends GameState
     {
         //musicSource.loop.update();
         //
-        if(!paused)
+        if(!paused || controller.isKeyPressed(GLFW_KEY_RIGHT_BRACKET))
         {
             //if(controller.isKeyHeld(GLFW_KEY_KP_ADD)){level.addScale(0.1f, Game.NORMAL_WIDTH, Game.NORMAL_HEIGHT);}
             //if(controller.isKeyHeld(GLFW_KEY_KP_SUBTRACT)){level.addScale(-0.1f, Game.NORMAL_WIDTH, Game.NORMAL_HEIGHT);}
@@ -86,7 +86,7 @@ public class TestState extends GameState
         if(controller.isKeyPressed(GLFW_KEY_ENTER))
         {
             //Pause.
-            //paused = !paused;
+            paused = !paused;
         }
         if(controller.isKeyPressed(GLFW_KEY_1))
         {

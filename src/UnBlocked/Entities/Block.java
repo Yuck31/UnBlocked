@@ -2,6 +2,7 @@ package UnBlocked.Entities;
 
 import UnBlocked.TileRenderable;
 import UnBlocked.Graphics.Screen;
+import UnBlocked.Graphics.SpriteRenderer.ScaleSpriteRenderer;
 
 /**
  * 
@@ -9,7 +10,12 @@ import UnBlocked.Graphics.Screen;
 
 public class Block extends Entity implements TileRenderable
 {
-    /**Consstructor.*/
+    //Sprite Renderer.
+    private ScaleSpriteRenderer spriteRenderer;
+
+    //private Vector2f targetPosition = new Vector2f();
+
+    /**Constructor.*/
     public Block(int x, int y)
     {
         super(x, y);

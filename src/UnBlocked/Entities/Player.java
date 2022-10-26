@@ -37,13 +37,16 @@ public class Player extends Entity implements TileRenderable
     protected Sprite[] playerSprites;
 
     //Specific Sprites.
-    //private Sprite 
+    private Sprite sprite_blink,
+    sprite_drop, sprite_holdDrop;
+    private Sprite[] sprite_preDrop = new Sprite[2],
+    sprite_preHoldDrop = new Sprite[2];
 
     //Animations.
     private Functional_FrameAnimation
-    anim_backWalk,
-    anim_climb0,
-    anim_climb1,
+    anim_backWalk;
+    private Functional_FrameAnimation[] anim_climb =  new Functional_FrameAnimation[2];
+    private Functional_FrameAnimation
     anim_dropLand,
     anim_fall,
     anim_fallLand,
@@ -67,7 +70,10 @@ public class Player extends Entity implements TileRenderable
     anim_zipLine0,
     anim_zipLine1;
 
-    private Functional_FrameAnimation currentAnim = null;
+    //Currently used animations.
+    private Functional_FrameAnimation 
+    currentIdle_Anim = null,
+    currentAction_Anim = null;
 
     //Command Buffer.
     public static final byte CMD_NONE = 0,
@@ -90,6 +96,9 @@ public class Player extends Entity implements TileRenderable
 
     private byte currentFoot = 0;
 
+    private boolean dropping = false;
+    private boolean holdingBlock = false;
+
     /**Constructor.*/
     public Player(int x, int y)
     {
@@ -107,17 +116,21 @@ public class Player extends Entity implements TileRenderable
             this::doNothing, this::backStep
         );
         //
-        anim_climb0 = Functional_FrameAnimation.load
+        anim_climb[0] = Functional_FrameAnimation.load
         (
             "Player/player_climb0", playerSprites,
             //
-            this::doNothing
+            this::climb_Start,
+            this::climb_Jump,
+            this::climb_Finish
         );
-        anim_climb1 = Functional_FrameAnimation.load
+        anim_climb[1] = Functional_FrameAnimation.load
         (
             "Player/player_climb1", playerSprites,
             //
-            this::doNothing
+            this::climb_Start,
+            this::climb_Jump,
+            this::climb_Finish
         );
         //
         anim_dropLand = Functional_FrameAnimation.load
@@ -224,10 +237,12 @@ public class Player extends Entity implements TileRenderable
         anim_zipLine1;
         */
 
-        spriteRenderer = new ScRoSpriteRenderer(anim_idle.getSprite(0), 0, 0,
-        1.0f, 1.0f, 0.0f, 0, 0, true, false);
+        sprite_blink = playerSprites[12];
 
-        currentAnim = anim_idle;
+        spriteRenderer = new ScRoSpriteRenderer(anim_idle.getSprite(0), 0, 0,
+        1.0f, 1.0f, 0.0f, 8, 8, true, false);
+
+        currentIdle_Anim = anim_idle;
     }
 
     public void init(Level level)
@@ -268,8 +283,8 @@ public class Player extends Entity implements TileRenderable
         //
         if(!inAnAction)
         {
-            //Last command check for animation purposes.
-            boolean actionMade = currentCommand != CMD_NONE;
+            //Previous command check for animation purposes.
+            boolean actionMade = this.currentCommand != CMD_NONE;
 
             //Get current command.
             this.currentCommand = commandBuffer[current_commandIndex];
@@ -279,7 +294,8 @@ public class Player extends Entity implements TileRenderable
             if(this.currentCommand != CMD_NONE)
             {
                 inAnAction = true;
-                idleTimer = 0;
+                idleTimer = MAX_BLINK_DURATION + 1;
+                currentIdle_Anim.resetAnim();
 
                 //System.out.println(current_commandIndex);
 
@@ -288,18 +304,18 @@ public class Player extends Entity implements TileRenderable
                 {
                     case CMD_LEFT:
                     {
+                        //Set sprite flip.
+                        spriteFlip = Sprite.FLIP_X;
+                        spriteRenderer.setFlip(spriteFlip);
+
                         //Check tile to the Player's left.
                         int tileID = level.getSolidTileID(tileX-1, tileY);
 
                         //If the tile is not solid, move there.
                         if(tileID == 0)
                         {
-                            //Set sprite flip.
-                            spriteFlip = Sprite.FLIP_X;
-                            spriteRenderer.setFlip(spriteFlip);
-
                             //Set animation.
-                            currentAnim = anim_run[currentFoot];
+                            currentAction_Anim = anim_run[currentFoot];
 
                             //Set Target Position.
                             targetPosition.x = (tileX-1) << Level.TILE_BITS;
@@ -314,18 +330,18 @@ public class Player extends Entity implements TileRenderable
 
                     case CMD_RIGHT:
                     {
+                        //Set sprite flip.
+                        spriteFlip = Sprite.FLIP_NONE;
+                        spriteRenderer.setFlip(spriteFlip);
+
                         //Check tile to the Player's left.
                         int tileID = level.getSolidTileID(tileX+1, tileY);
 
                         //If the tile is not solid, move there.
                         if(tileID == 0)
                         {
-                            //Set sprite flip.
-                            spriteFlip = Sprite.FLIP_NONE;
-                            spriteRenderer.setFlip(spriteFlip);
-
                             //Set animation.
-                            currentAnim = anim_run[currentFoot];
+                            currentAction_Anim = anim_run[currentFoot];
 
                             //Set Target Position.
                             targetPosition.x = (tileX+1) << Level.TILE_BITS;
@@ -340,18 +356,7 @@ public class Player extends Entity implements TileRenderable
 
                     case CMD_CLIMB:
                     {
-                        //Check tile to the Player's top.
-                        int tileID = level.getSolidTileID(tileX, tileY-1);
-
-                        //If the tile is not solid, move there.
-                        if(tileID == 0)
-                        {
-                            level.setPlayerPosition(tileX, tileY, tileX, tileY-1);
-                            tileY--;
-                            position.y = tileY << Level.TILE_BITS;
-                        }
-
-                        inAnAction = false;
+                        executeClimb();
                     }
                     break;
 
@@ -392,9 +397,8 @@ public class Player extends Entity implements TileRenderable
             //Otherwise, Idle animations.
             else
             {
-                if(actionMade){currentAnim = anim_idle;}
                 idleTimer++;
-                //anim_idle.update(timeMod, spriteRenderer);
+                currentIdle_Anim.update(timeMod, spriteRenderer);
                 //spriteRenderer.setSprite(Sprites.flatSprite);
             }
         }
@@ -402,10 +406,12 @@ public class Player extends Entity implements TileRenderable
         //
         //Running Commands.
         //
-        //else
-        //{
-            currentAnim.update(timeMod, spriteRenderer);
-        //}
+        else
+        {
+            currentAction_Anim.update(timeMod, spriteRenderer);
+            //spriteRenderer.addXOffset(8);
+            //spriteRenderer.addYOffset(8);
+        }
     }
 
     /**Adds a command to the command buffer.*/
@@ -417,6 +423,37 @@ public class Player extends Entity implements TileRenderable
             input_commandIndex = (input_commandIndex+1) % commandBuffer.length;
         }
     }
+
+
+    private void executeClimb()
+    {
+        //Check tile to the Player's front and front-up.
+        int tx = (spriteFlip == Sprite.FLIP_X) ? tileX-1 : tileX+1;
+
+        int tFront = level.getSolidTileID(tx, tileY),
+        tFrontAbove = level.getSolidTileID(tx, tileY-1),
+        tAbove = level.getSolidTileID(tileX, tileY-1);
+
+        //If the front tile is solid and ones above it and the player are not.
+        if(tFront != 0 && tFrontAbove == 0 && tAbove == 0)
+        {
+            //Set animation.
+            currentAction_Anim = anim_climb[currentFoot];
+
+            //Set Target Position.
+            targetPosition.x = tx << Level.TILE_BITS;
+            targetPosition.y = (tileY-1) << Level.TILE_BITS;
+
+            //Slight X offset.
+            if(spriteFlip == Sprite.FLIP_NONE){position.x++;}
+        }
+        //Otherwise, hop helplessly.
+        else
+        {
+            inAnAction = false;
+        }
+    }
+
 
     //Inputs.
     private byte input_Horizontal = 0, input_Vertical = 0;
@@ -476,6 +513,96 @@ public class Player extends Entity implements TileRenderable
 
     }
 
+    private float yVelocity = 0.0f;
+
+    public void climb_Start(float timeMod, byte loopStatus){yVelocity = INITIAL_Y_VELOCITY;}
+
+    private static final float INITIAL_Y_VELOCITY = -3.0f,
+    GRAVITY = 0.4f,
+    CLIMB_X = 0.9f;
+
+    public void climb_Jump(float timeMod, byte loopStatus)
+    {
+        int tx = (spriteFlip == Sprite.FLIP_X) ? tileX-1 : tileX+1;
+
+        if(yVelocity <= INITIAL_Y_VELOCITY)
+        {
+            //Set level position.
+            level.setPlayerPosition(tileX, tileY, tx, tileY-1);
+
+            //Apply initial offset.
+            position.x += (spriteFlip == Sprite.FLIP_X) ? -4 : 4;
+            position.y -= 8.0f;
+        }
+
+        //Loop this frame until the player hits the ground.
+        if(currentAction_Anim.getFrame() >= 3)
+        {currentAction_Anim.setFrame(3);}
+
+        if(yVelocity > 0.0f && position.y + yVelocity >= targetPosition.y)
+        {
+            //Set level position.
+            level.setPlayerPosition(tileX, tileY, tx, tileY-1);
+
+            //Set actual position.
+            setTilePosition(tx, tileY-1);
+
+            //Advance animation.
+            currentAction_Anim.setFrame(4);
+        }
+        else
+        {
+            position.y += yVelocity;
+            yVelocity += GRAVITY;
+
+            switch(spriteFlip)
+            {
+                case Sprite.FLIP_X:
+                {
+                    if(position.x - CLIMB_X > targetPosition.x){position.x -= CLIMB_X;}
+                    else{position.x = targetPosition.x;}
+                }
+                break;
+
+                case Sprite.FLIP_NONE:
+                {
+                    if(position.x + CLIMB_X < targetPosition.x){position.x += CLIMB_X;}
+                    else{position.x = targetPosition.x;}
+                }
+                break;
+            }
+        }
+    }
+
+    public void climb_Finish(float timeMod, byte loopStatus)
+    {
+        if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
+        {
+            currentAction_Anim.resetAnim();
+            inAnAction = false;
+            currentFoot = (byte)((currentFoot+1) % 2);
+        }
+        else
+        {
+            //Check for another climb command.
+            this.currentCommand = commandBuffer[current_commandIndex];
+            //
+            if(this.currentCommand == CMD_CLIMB)
+            {
+                //Reset current animation and change foot.
+                currentAction_Anim.resetAnim();
+                currentFoot = (byte)((currentFoot+1) % 2);
+
+                //Advance command buffer.
+                commandBuffer[current_commandIndex] = CMD_NONE;
+                current_commandIndex = (current_commandIndex+1) % commandBuffer.length;
+
+                //Execute climb.
+                executeClimb();
+            }
+        }
+    }
+
     public void idle(float timeMod, byte loopStatus)
     {
 
@@ -486,55 +613,102 @@ public class Player extends Entity implements TileRenderable
 
     }
 
-    private static float runX = 1.125f;
+    private static final float RUN_X = 0.9f;
     public void run(float timeMod, byte loopStatus)
     {
         switch(currentCommand)
         {
             case CMD_LEFT:
             {
-                if(position.x - runX <= targetPosition.x && loopStatus == FrameAnimation_Timer.HAS_ENDED)
+                if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
                 {
-                    setTilePosition(tileX-1, tileY);
-                    currentAnim.resetAnim();
+                    //Set position in Level.
+                    level.setPlayerPosition(tileX, tileY, tileX-1, tileY);
+
+                    //Set position.
+                    setTileX(tileX-1);
+                    fallCheck();
+
+                    currentAction_Anim.resetAnim();
                     inAnAction = false;
                     currentFoot = (byte)((currentFoot+1) % 2);
                 }
-                else{position.x -= runX;}
+                else if(position.x - RUN_X > targetPosition.x){position.x -= RUN_X;}
+                else{position.x = targetPosition.x;}
             }
             break;
 
             case CMD_RIGHT:
             {
-                if(position.x + runX >= targetPosition.x && loopStatus == FrameAnimation_Timer.HAS_ENDED)
+                if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
                 {
-                    setTilePosition(tileX+1, tileY);
-                    currentAnim.resetAnim();
+                    //Set position in Level.
+                    level.setPlayerPosition(tileX, tileY, tileX+1, tileY);
+
+                    //Set position.
+                    setTileX(tileX+1);
+                    fallCheck();
+
+                    currentAction_Anim.resetAnim();
                     inAnAction = false;
                     currentFoot = (byte)((currentFoot+1) % 2);
                 }
-                else{position.x += runX;}
+                else if(position.x + RUN_X < targetPosition.x){position.x += RUN_X;}
+                else{position.x = targetPosition.x;}
             }
             break;
         }
     }
 
+    private void fallCheck()
+    {
+        if(level.getSolidTileID(tileX, tileY-1) == 0)
+        {
+            for(int f = tileY-1; f < level.getHeight(); f++)
+            {
+                int st = level.getSolidTileID(tileX, f);
 
-    Vector4f color = new Vector4f(0.0f, 0.5f, 0.5f, 1.0f);
+                if(st != 0)
+                {
+                    level.setPlayerPosition(tileX, tileY, tileX, f-1);
+                    setTileY(f-1);
+                    break;
+                }
+            }
+        }
+    }
+
+    Vector4f color = new Vector4f(0.0f, 0.5f, 0.5f, 0.2f);
+    Vector4f color1 = new Vector4f(1.0f, 0.5f, 0.5f, 1.0f);
+
+    Vector2f visualPosition = new Vector2f();
 
     @Override
     public void render(Screen screen, int x, int y, float scale)
     {
         screen.fillRect(tileX << Level.TILE_BITS, tileY << Level.TILE_BITS, Level.TILE_SIZE, Level.TILE_SIZE, color, true);
 
+        //Set visual position.
+        visualPosition.x = position.x+16;
+        visualPosition.y = position.y+16;
+
         //Render main sprite.
-        spriteRenderer.render(screen, position, scale);
+        spriteRenderer.render(screen, visualPosition, scale);
 
         //If blinking, render blink.
-        if(idleTimer % MAX_BLINK_TIME <= MAX_BLINK_DURATION)
+        if(!inAnAction && idleTimer % MAX_BLINK_TIME <= MAX_BLINK_DURATION)
         {
-
+            float xs = spriteRenderer.getXScale() * scale, ys = spriteRenderer.getYScale() * scale;
+            //
+            screen.renderSprite_Sc
+            (
+                (int)((visualPosition.x + blinkX) * scale),
+                (int)((visualPosition.y + blinkY) * scale),
+                0,
+                sprite_blink, spriteRenderer.getFlip(), 0, 0, xs, ys, true
+            );
         }
-        //screen.renderSprite_Sc
+        
+        screen.fillRect((int)position.x, (int)position.y, 1, 1, color1, true);
     }
 }

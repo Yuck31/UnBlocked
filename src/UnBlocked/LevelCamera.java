@@ -32,6 +32,9 @@ public class LevelCamera
     /**Constructor.*/
     public LevelCamera(Level level){this(level, Game.SCREEN_WIDTH, Game.SCREEN_HEIGHT);}
 
+    public void setEntityPosition(Vector2f entityPosition)
+    {this.entityPosition = entityPosition;}
+
     /**Updates this camera's position.*/
     public void update()
     {
@@ -61,7 +64,7 @@ public class LevelCamera
             }
 
             //NOW set the actual position.
-            //position.set(potentialPosition);
+            position.set(potentialPosition);
         }
     }
 

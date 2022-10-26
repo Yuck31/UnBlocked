@@ -98,7 +98,7 @@ public class ScRoSpriteRenderer extends SpriteRenderer
         //
         screen.renderSprite_ScRo
         (
-            (int)((x + offset.x) * scaleOffset),
+            (int)((x + (((flip & Sprite.FLIP_X) == 1) ? -(sprite.getWidth() + offset.x) : offset.x)) * scaleOffset),
             (int)((y + offset.y) * scaleOffset),
             sprite, flip, 0, 0,
             xs, ys,

@@ -40,6 +40,10 @@ public abstract class SpriteRenderer
     public final void setOffset(int xOffset, int yOffset){this.offset.set(xOffset, yOffset);}
     public final void setOffset(Vector2f offset){this.offset.set(offset);}
 
+    //Offset adders.
+    public final void addXOffset(int xOffset){this.offset.x += xOffset;}
+    public final void addYOffset(int yOffset){this.offset.y += yOffset;}
+
     //FlipAttribute Getter/Setter
     public final byte getFlip(){return this.flip;}
     public final void setFlip(byte flip){this.flip = flip;}

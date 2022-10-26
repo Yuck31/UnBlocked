@@ -19,9 +19,15 @@ public abstract class Entity
     public Entity(int tileX, int tileY){setTilePosition(tileX, tileY);}
 
     //
+    //Position Getters.
+    //
+    public final Vector2f getPosition(){return this.position;}
+
+    
+    //
     //Position setters.
     //
-    public final void setTileX(int tileX, int tileY)
+    public final void setTileX(int tileX)
     {
         this.tileX = tileX;
         position.x = tileX << Level.TILE_BITS;
