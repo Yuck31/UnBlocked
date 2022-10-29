@@ -11,8 +11,6 @@ import org.joml.Vector4f;
 import UnBlocked.Controller;
 import UnBlocked.Game;
 import UnBlocked.Level;
-import UnBlocked.Tile;
-import UnBlocked.TileRenderable;
 import UnBlocked.Graphics.Screen;
 import UnBlocked.Graphics.Sprite;
 import UnBlocked.Graphics.SpriteSheet;
@@ -21,7 +19,7 @@ import UnBlocked.Graphics.Animations.FrameAnimation_Timer;
 import UnBlocked.Graphics.Animations.Functional_FrameAnimation;
 import UnBlocked.Graphics.SpriteRenderer.ScRoSpriteRenderer;
 
-public class Player extends Entity implements TileRenderable
+public class Player extends Entity
 {
     //Controller Reference.
     private transient Controller controller = Game.controller;
@@ -41,21 +39,26 @@ public class Player extends Entity implements TileRenderable
     sprite_drop, sprite_holdDrop;
     private Sprite[] sprite_preDrop = new Sprite[2],
     sprite_preHoldDrop = new Sprite[2];
+    private Sprite sprite_turnAround;
 
     //Animations.
     private Functional_FrameAnimation
-    anim_backWalk;
+    anim_backWalk,
+    anim_bonk;
     private Functional_FrameAnimation[] anim_climb =  new Functional_FrameAnimation[2];
     private Functional_FrameAnimation
-    anim_dropLand,
+    anim_drop,
     anim_fall,
     anim_fallLand,
+    anim_holdBonk,
     anim_holdClimb,
-    anim_holdDropLand,
+    anim_holdDrop,
     anim_holdFallLand,
+    anim_holdHop,
     anim_holdIdleLook;
     private Functional_FrameAnimation[] anim_holdRun = new Functional_FrameAnimation[2];
     private Functional_FrameAnimation
+    anim_hop,
     anim_idle,
     anim_idleLook,
     anim_idleSDeck0,
@@ -90,14 +93,21 @@ public class Player extends Entity implements TileRenderable
     private boolean inAnAction = false;
     private byte spriteFlip = Sprite.FLIP_NONE;
 
-    public static final int MAX_BLINK_TIME = 200, MAX_BLINK_DURATION = 10;
+    public static final int MAX_BLINK_TIME = 200, MAX_BLINK_DURATION = 7;
     private int idleTimer = MAX_BLINK_DURATION + 1;
     private byte blinkX, blinkY;
 
     private byte currentFoot = 0;
 
-    private boolean dropping = false;
-    private boolean holdingBlock = false;
+    public static final byte FALLING_NOT = 0,
+    FALLING_DROP = 1,
+    FALLING_FALL = 2;
+    private byte falling = FALLING_NOT;
+    private int fallingY = 0;
+
+    private boolean neededToTurnAround = false,
+    bonking = false;
+    private Block block = null;
 
     /**Constructor.*/
     public Player(int x, int y)
@@ -114,6 +124,12 @@ public class Player extends Entity implements TileRenderable
             "Player/player_backWalk", playerSprites,
             //
             this::doNothing, this::backStep
+        );
+        anim_bonk = Functional_FrameAnimation.load
+        (
+            "Player/player_bonk", playerSprites,
+            //
+            this::bonk
         );
         //
         anim_climb[0] = Functional_FrameAnimation.load
@@ -133,11 +149,12 @@ public class Player extends Entity implements TileRenderable
             this::climb_Finish
         );
         //
-        anim_dropLand = Functional_FrameAnimation.load
+        anim_drop = Functional_FrameAnimation.load
         (
-            "Player/player_dropLand", playerSprites,
+            "Player/player_drop", playerSprites,
             //
-            this::doNothing
+            this::drop,
+            this::drop
         );
         anim_fall = Functional_FrameAnimation.load
         (
@@ -152,23 +169,36 @@ public class Player extends Entity implements TileRenderable
             this::doNothing
         );
         //
+        anim_holdBonk = Functional_FrameAnimation.load
+        (
+            "Player/player_holdBonk", playerSprites,
+            //
+            this::bonk
+        );
+        //
         anim_holdClimb = Functional_FrameAnimation.load
         (
             "Player/player_holdClimb", playerSprites,
             //
             this::doNothing
         );
-        anim_holdDropLand = Functional_FrameAnimation.load
+        anim_holdDrop = Functional_FrameAnimation.load
         (
-            "Player/player_holdDropLand", playerSprites,
+            "Player/player_holdDrop", playerSprites,
             //
-            (timeMod, loopStatus) -> {return;}
+            this::drop
         );
         anim_holdFallLand = Functional_FrameAnimation.load
         (
             "Player/player_holdFallLand", playerSprites,
             //
             this::doNothing
+        );
+        //
+        anim_holdHop = Functional_FrameAnimation.load
+        (
+            "Player/player_holdHop", playerSprites,
+            this::hop
         );
         //
         anim_holdIdleLook = Functional_FrameAnimation.load
@@ -192,15 +222,21 @@ public class Player extends Entity implements TileRenderable
             this::run
         );
         //
+        anim_hop = Functional_FrameAnimation.load
+        (
+            "Player/player_hop", playerSprites,
+            this::hop
+        );
+        //
         anim_idle = Functional_FrameAnimation.load
         (
             "Player/player_idle", playerSprites,
             //
             this::idle,
             //{System.out.println("High Blink");},
-            this::idle,
-            //{System.out.println("Low Blink");},
             this::idle_breathe
+            //{System.out.println("Low Blink");},
+            //this::idle
             //{System.out.println("High Blink and Exhale");}
         
         );
@@ -231,13 +267,18 @@ public class Player extends Entity implements TileRenderable
             this::run,
             this::run
         );
+        anim_spinJump = Functional_FrameAnimation.load
+        (
+            "Player/player_spinJump", playerSprites,
+            this::doNothing
+        );
         /*
-        anim_spinJump,
         anim_zipLine0,
         anim_zipLine1;
         */
 
         sprite_blink = playerSprites[12];
+        sprite_turnAround = playerSprites[133];
 
         spriteRenderer = new ScRoSpriteRenderer(anim_idle.getSprite(0), 0, 0,
         1.0f, 1.0f, 0.0f, 8, 8, true, false);
@@ -245,10 +286,13 @@ public class Player extends Entity implements TileRenderable
         currentIdle_Anim = anim_idle;
     }
 
-    public void init(Level level)
-    {
-        this.level = level;
-    }
+    
+    @Override
+    public boolean isSolid(){return false;}
+
+
+    private static final float SPEED_MUL_DEC = 0.315f;
+    private float speedMul = 1.0f;
 
     @Override
     /**Update function.*/
@@ -304,53 +348,13 @@ public class Player extends Entity implements TileRenderable
                 {
                     case CMD_LEFT:
                     {
-                        //Set sprite flip.
-                        spriteFlip = Sprite.FLIP_X;
-                        spriteRenderer.setFlip(spriteFlip);
-
-                        //Check tile to the Player's left.
-                        int tileID = level.getSolidTileID(tileX-1, tileY);
-
-                        //If the tile is not solid, move there.
-                        if(tileID == 0)
-                        {
-                            //Set animation.
-                            currentAction_Anim = anim_run[currentFoot];
-
-                            //Set Target Position.
-                            targetPosition.x = (tileX-1) << Level.TILE_BITS;
-                        }
-                        //Otherwise, bonk into it.
-                        else
-                        {
-                            inAnAction = false;
-                        }
+                        executeRun(false);
                     }
                     break;
 
                     case CMD_RIGHT:
                     {
-                        //Set sprite flip.
-                        spriteFlip = Sprite.FLIP_NONE;
-                        spriteRenderer.setFlip(spriteFlip);
-
-                        //Check tile to the Player's left.
-                        int tileID = level.getSolidTileID(tileX+1, tileY);
-
-                        //If the tile is not solid, move there.
-                        if(tileID == 0)
-                        {
-                            //Set animation.
-                            currentAction_Anim = anim_run[currentFoot];
-
-                            //Set Target Position.
-                            targetPosition.x = (tileX+1) << Level.TILE_BITS;
-                        }
-                        //Otherwise, bonk into it.
-                        else
-                        {
-                            inAnAction = false;
-                        }
+                        executeRun(true);
                     }
                     break;
 
@@ -362,8 +366,9 @@ public class Player extends Entity implements TileRenderable
 
                     case CMD_PICKUP:
                     {
+                        /*
                         //Check tile to the Player's bottom.
-                        int tileID = level.getSolidTileID(tileX, tileY+1);
+                        boolean tileID = level.isSlid(tileX, tileY+1);
 
                         //If the tile is not solid, move there.
                         if(tileID == 0)
@@ -372,6 +377,7 @@ public class Player extends Entity implements TileRenderable
                             tileY++;
                             position.y = tileY << Level.TILE_BITS;
                         }
+                        */
 
                         inAnAction = false;
                     }
@@ -406,9 +412,12 @@ public class Player extends Entity implements TileRenderable
         //
         //Running Commands.
         //
-        else
+        if(inAnAction)
         {
-            currentAction_Anim.update(timeMod, spriteRenderer);
+            if(speedMul - SPEED_MUL_DEC <= 1.0f){speedMul = 1.0f;}
+            else{speedMul -= SPEED_MUL_DEC;}
+            System.out.println(speedMul);
+            currentAction_Anim.update(speedMul, spriteRenderer);
             //spriteRenderer.addXOffset(8);
             //spriteRenderer.addYOffset(8);
         }
@@ -425,17 +434,55 @@ public class Player extends Entity implements TileRenderable
     }
 
 
+    private void executeRun(boolean right)
+    {
+        //Going left or right?
+        int tx = (right) ? tileX+1 : tileX-1;
+
+        //Set sprite flip.
+        if(!right && spriteFlip != Sprite.FLIP_X)
+        {
+            spriteFlip = Sprite.FLIP_X;
+            spriteRenderer.setFlip(spriteFlip);
+            neededToTurnAround = true;
+        }
+        else if(right && spriteFlip != Sprite.FLIP_NONE)
+        {
+            spriteFlip = Sprite.FLIP_NONE;
+            spriteRenderer.setFlip(spriteFlip);
+            neededToTurnAround = true;
+        }
+
+        //Check tile to the direction the Player is moving in.
+        boolean solid = level.isSolid(tx, tileY);
+
+        //Set animation.
+        currentAction_Anim = anim_run[currentFoot];
+
+        //Set Target Position.
+        targetPosition.x = (tx) << Level.TILE_BITS;
+
+        //If the tile is solid, bonk into it.
+        if(solid){bonking = true;}
+        //Otherwise, if there isn't a floor underneath Target X, fall.
+        else if(!level.isSolid(tx, tileY+1))
+        {
+            falling = FALLING_DROP;
+            speedMul = 3.0f;
+        }
+    }
+
     private void executeClimb()
     {
         //Check tile to the Player's front and front-up.
         int tx = (spriteFlip == Sprite.FLIP_X) ? tileX-1 : tileX+1;
 
-        int tFront = level.getSolidTileID(tx, tileY),
-        tFrontAbove = level.getSolidTileID(tx, tileY-1),
-        tAbove = level.getSolidTileID(tileX, tileY-1);
+        boolean sFront = level.isSolid(tx, tileY),
+        sFrontAbove = level.isSolid(tx, tileY-1),
+        sAbove = level.isSolid(tileX, tileY-1);
 
         //If the front tile is solid and ones above it and the player are not.
-        if(tFront != 0 && tFrontAbove == 0 && tAbove == 0)
+        if(sFront && !sFrontAbove && !sAbove)
         {
             //Set animation.
             currentAction_Anim = anim_climb[currentFoot];
@@ -450,7 +497,12 @@ public class Player extends Entity implements TileRenderable
         //Otherwise, hop helplessly.
         else
         {
-            inAnAction = false;
+            //Set animation.
+            currentAction_Anim = anim_hop;
+
+            //Set Target Position and yVelocity.
+            targetPosition.y = tileY << Level.TILE_BITS;
+            yVelocity = INITIAL_Y_VELOCITY * 0.75f;
         }
     }
 
@@ -546,6 +598,7 @@ public class Player extends Entity implements TileRenderable
 
             //Set actual position.
             setTilePosition(tx, tileY-1);
+            yVelocity = 0.0f;
 
             //Advance animation.
             currentAction_Anim.setFrame(4);
@@ -605,77 +658,212 @@ public class Player extends Entity implements TileRenderable
 
     public void idle(float timeMod, byte loopStatus)
     {
-
+        blinkX = (byte)((spriteFlip == Sprite.FLIP_X) ? -14 : -6);
+        blinkY = -17;
     }
 
     public void idle_breathe(float timeMod, byte loopStatus)
     {
-
+        blinkX = (byte)((spriteFlip == Sprite.FLIP_X) ? -14 : -6);
+        blinkY = -16;
     }
 
-    private static final float RUN_X = 0.9f;
+    private static final float BONK_RECOIL_X = 0.5f;
+    public void bonk(float timeMod, byte loopStatus)
+    {
+        if(currentAction_Anim.getFrame() > 0)
+        {position.x += (spriteFlip == Sprite.FLIP_X) ? BONK_RECOIL_X : -BONK_RECOIL_X;}
+        //
+        if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
+        {
+            setTileX(tileX);
+            bonking = false;
+            currentAction_Anim.resetAnim();
+            neededToTurnAround = false;
+            inAnAction = false;
+            currentFoot = (byte)((currentFoot+1) % 2);
+        }
+    }
+
+    public void drop(float timeMod, byte loopStatus)
+    {
+        if(currentAction_Anim.getFrame() <= 0)
+        {
+            if(position.y + yVelocity >= targetPosition.y)
+            {
+                level.setPlayerPosition(tileX, tileY, tileX, fallingY);
+                setTileY(fallingY);
+                currentAction_Anim.setFrame(1);
+            }
+            else
+            {
+                position.y += yVelocity;
+                yVelocity += GRAVITY;
+                currentAction_Anim.setFrame(0);
+            }
+        }
+        else if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
+        {
+            currentAction_Anim.resetAnim();
+            yVelocity = 0.0f;
+            falling = FALLING_NOT;
+            inAnAction = false;
+        }
+        else if(currentAction_Anim.getFrame() > 1)
+        {
+            //Check for another run command.
+            this.currentCommand = commandBuffer[current_commandIndex];
+            //
+            if(this.currentCommand == CMD_LEFT)
+            {
+                //Reset current animation.
+                currentAction_Anim.resetAnim();
+                yVelocity = 0.0f;
+                falling = FALLING_NOT;
+
+                //Advance command buffer.
+                commandBuffer[current_commandIndex] = CMD_NONE;
+                current_commandIndex = (current_commandIndex+1) % commandBuffer.length;
+
+                //Execute run.
+                executeRun(false);
+            }
+            else if(this.currentCommand == CMD_RIGHT)
+            {
+                //Reset current animation.
+                currentAction_Anim.resetAnim();
+                yVelocity = 0.0f;
+                falling = FALLING_NOT;
+
+                //Advance command buffer.
+                commandBuffer[current_commandIndex] = CMD_NONE;
+                current_commandIndex = (current_commandIndex+1) % commandBuffer.length;
+
+                //Execute run.
+                executeRun(true);
+            }
+        }
+    }
+    
+    public void hop(float timeMod, byte loopStatus)
+    {
+        //Loop frame until the player lands.
+        currentAction_Anim.setFrame(0);
+
+        if(yVelocity > 0.0f && position.y + yVelocity >= targetPosition.y)
+        {
+            //Set actual position.
+            setTilePosition(tileX, tileY);
+            yVelocity = 0.0f;
+
+            //Get out of this animation.
+            inAnAction = false;
+        }
+        else
+        {
+            position.y += yVelocity;
+            yVelocity += GRAVITY;
+        }
+    }
+
+    private static final float RUN_X = 0.9f, BONK_X = 14.0f;
     public void run(float timeMod, byte loopStatus)
     {
+        if(currentAction_Anim.getFrame() < 2 && neededToTurnAround)
+        {
+            spriteRenderer.setOffset(-8, -14);
+            spriteRenderer.setSprite(sprite_turnAround);
+        }
+        //
+        if(currentAction_Anim.getFrame() >= 2 && falling == FALLING_DROP)
+        {
+            currentAction_Anim.getFrameSprite(2, spriteRenderer);
+        }
+
         switch(currentCommand)
         {
             case CMD_LEFT:
             {
-                if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
+                if(bonking && position.x - (RUN_X * timeMod) < targetPosition.x + BONK_X)
+                {
+                    position.x = targetPosition.x + BONK_X;
+                    currentAction_Anim.resetAnim();
+                    currentAction_Anim = anim_bonk;
+                }
+                else if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
                 {
                     //Set position in Level.
                     level.setPlayerPosition(tileX, tileY, tileX-1, tileY);
 
                     //Set position.
                     setTileX(tileX-1);
-                    fallCheck();
 
+                    //Reset animation.
                     currentAction_Anim.resetAnim();
-                    inAnAction = false;
+                    neededToTurnAround = false;
                     currentFoot = (byte)((currentFoot+1) % 2);
+
+                    if(falling == FALLING_NOT){inAnAction = false;}
+                    else if(falling == FALLING_DROP)
+                    {
+                        fallingY = fallCheck(tileX, tileY);
+                        targetPosition.y = fallingY << Level.TILE_BITS;
+                        currentAction_Anim = anim_drop;
+                    }
                 }
-                else if(position.x - RUN_X > targetPosition.x){position.x -= RUN_X;}
+                else if(position.x - (RUN_X * timeMod) > targetPosition.x){position.x -= (RUN_X * timeMod);}
                 else{position.x = targetPosition.x;}
             }
             break;
 
             case CMD_RIGHT:
             {
-                if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
+                if(bonking && position.x + (RUN_X * timeMod) > targetPosition.x - BONK_X)
+                {
+                    position.x = targetPosition.x - BONK_X;
+                    currentAction_Anim.resetAnim();
+                    currentAction_Anim = anim_bonk;
+                }
+                else if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
                 {
                     //Set position in Level.
                     level.setPlayerPosition(tileX, tileY, tileX+1, tileY);
 
                     //Set position.
                     setTileX(tileX+1);
-                    fallCheck();
 
                     currentAction_Anim.resetAnim();
-                    inAnAction = false;
+                    neededToTurnAround = false;
                     currentFoot = (byte)((currentFoot+1) % 2);
+
+                    if(falling == FALLING_NOT){inAnAction = false;}
+                    else if(falling == FALLING_DROP)
+                    {
+                        fallingY = fallCheck(tileX, tileY);
+                        targetPosition.y = fallingY << Level.TILE_BITS;
+                        currentAction_Anim = anim_drop;
+                    }
                 }
-                else if(position.x + RUN_X < targetPosition.x){position.x += RUN_X;}
+                else if(position.x + (RUN_X * timeMod) < targetPosition.x){position.x += (RUN_X * timeMod);}
                 else{position.x = targetPosition.x;}
             }
             break;
         }
     }
 
-    private void fallCheck()
+    private int fallCheck(int tx, int ty)
     {
-        if(level.getSolidTileID(tileX, tileY-1) == 0)
+        for(int f = tileY-1; f < level.getHeight(); f++)
         {
-            for(int f = tileY-1; f < level.getHeight(); f++)
-            {
-                int st = level.getSolidTileID(tileX, f);
+            boolean st = level.isSolid(tileX, f);
 
-                if(st != 0)
-                {
-                    level.setPlayerPosition(tileX, tileY, tileX, f-1);
-                    setTileY(f-1);
-                    break;
-                }
+            if(st)
+            {
+                return f-1;
             }
         }
+
+        return level.getHeight() << Level.TILE_BITS;
     }
 
     Vector4f color = new Vector4f(0.0f, 0.5f, 0.5f, 0.2f);
@@ -710,5 +898,10 @@ public class Player extends Entity implements TileRenderable
         }
         
         screen.fillRect((int)position.x, (int)position.y, 1, 1, color1, true);
+    }
+
+    public void renderBlock(Screen screen, float scale)
+    {
+        if(block != null){block.render(screen, scale);}
     }
 }

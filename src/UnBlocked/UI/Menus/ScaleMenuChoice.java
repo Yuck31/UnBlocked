@@ -24,7 +24,7 @@ public class ScaleMenuChoice extends MenuChoice
         super(x, y, shape, action);
         this.sprites = sprites;
 
-        spriteRenderer  = new ScaleSpriteRenderer(sprites[0], 0, 0, 0, false, false);
+        spriteRenderer  = new ScaleSpriteRenderer(sprites[0], 0, 0, false, false);
     }
 
     @Override

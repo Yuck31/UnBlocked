@@ -24,7 +24,7 @@ public class Tile implements TileRenderable
         this.animation = animation;
 
         //Set spriteRenderer.
-        spriteRenderer = new ScaleSpriteRenderer(animation.getSprite(0), xOffset, yOffset, 0, true,
+        spriteRenderer = new ScaleSpriteRenderer(animation.getSprite(0), xOffset, yOffset, true,
         (color.x == 1.0f && color.y == 1.0f && color.z == 1.0f && color.w == 1.0f) ? false : true);
 
         //Set color.

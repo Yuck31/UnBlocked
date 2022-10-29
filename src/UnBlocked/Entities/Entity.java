@@ -5,8 +5,9 @@ package UnBlocked.Entities;
 import org.joml.Vector2f;
 
 import UnBlocked.Level;
+import UnBlocked.TileRenderable;
 
-public abstract class Entity
+public abstract class Entity implements TileRenderable
 {
     //Level.
     protected Level level = null;
@@ -17,6 +18,13 @@ public abstract class Entity
 
     /**Constructor.*/
     public Entity(int tileX, int tileY){setTilePosition(tileX, tileY);}
+
+    //Level Setter.
+    public final void init(Level level){this.level = level;}
+
+    //Is solid.
+    public abstract boolean isSolid();
+
 
     //
     //Position Getters.

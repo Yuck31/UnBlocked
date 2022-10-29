@@ -12,6 +12,8 @@ import UnBlocked.Graphics.Sprite;
 import UnBlocked.Graphics.SpriteSheet;
 import UnBlocked.Graphics.Sprites;
 import UnBlocked.Graphics.Animations.FrameAnimation;
+import UnBlocked.Entities.Entities;
+import UnBlocked.Entities.Entity;
 import UnBlocked.Entities.Player;
 
 public class Level
@@ -95,10 +97,10 @@ public class Level
             0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         };
-        loadEntities();
+        initPlayer();
         camera.setEntityPosition(player.getPosition());
     }
 
@@ -106,7 +108,7 @@ public class Level
     public int getHeight(){return height;}
 
 
-    private void loadEntities()
+    private void initPlayer()
     {
         for(int y = 0; y < height; y++)
         {
@@ -117,8 +119,9 @@ public class Level
                 switch(entityID)
                 {
                     case 1:
-                    player = new Player(x, y);
-                    player.init(this);
+                    this.player = (Player)Entities.get(1);
+                    this.player.setTilePosition(x, y);
+                    this.player.init(this);
                     break;
 
                     default:
@@ -206,29 +209,36 @@ public class Level
             for(int x = x0; x < x1; x++)
             {
                 //Get Entity ID.
-                int entityID = getEntityID_Unsafe(x, y);
+                int entityID = getEntityID_Unsafe(x, y),
+                entityBelow = getEntityID(x, y+1);
 
-                int tx = x << TILE_BITS, ty = y << TILE_BITS;
-
-                if(entityID != 0)
+                //Player's block check.
+                if(entityBelow == 1){player.renderBlock(screen, scale);}
+                else
                 {
-                    //Player case.
-                    if(entityID == 1){player.render(screen, tx, ty, scale);}
-                    continue;
-                }
+                    //Tile render
+                    int tx = x << TILE_BITS, ty = y << TILE_BITS;
 
+                    if(entityID != 0)
+                    {
+                        //Player case.
+                        if(entityID == 1){player.render(screen, tx, ty, scale);}
+                        else if(entityID == 8){Entities.get(8).render(screen, tx, ty, scale);}
+                        continue;
+                    }
 
-                //Get Tile ID.
-                byte tileID = getTileID_Unsafe(x, y);
+                    //Get Tile ID.
+                    byte tileID = getTileID_Unsafe(x, y);
 
-                //Get playground tile IDs.
-                int p = (((tileID & 0xF0) >> 4) & 0xFF) - 1;
+                    //Get playground tile IDs.
+                    int p = (((tileID & 0xF0) >> 4) & 0xFF) - 1;
 
-                if(p >= 0)
-                {
-                    //Get and render Tile Animation.
-                    Tile pt = playground_TileAnims[p];
-                    pt.render(screen, tx, ty, scale);
+                    if(p >= 0)
+                    {
+                        //Get and render Tile Animation.
+                        Tile pt = playground_TileAnims[p];
+                        pt.render(screen, tx, ty, scale);
+                    }
                 }
             }
         }
@@ -248,12 +258,13 @@ public class Level
 
 
     /**Gets the Tile ID at the given Tile point.*/
-    public int getSolidTileID(int x, int y)
+    public boolean isSolid(int x, int y)
     {
         if(x < 0 || x >= width || y < 0 || y >= height)
-        {return 0;}
+        {return true;}
 
-        return ((tiles[x + y * width] & 0xF0) >> 4) & 0xFF;
+        return (((tiles[x + y * width] & 0xF0) >> 4) & 0xFF) > 0
+        || Entities.get(entities[x + y * width]).isSolid();
     }
 
 

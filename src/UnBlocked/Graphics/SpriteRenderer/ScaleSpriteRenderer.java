@@ -17,7 +17,7 @@ public class ScaleSpriteRenderer extends SpriteRenderer
     private float xScale = 1.0f, yScale = 1.0f;
 
     /**Constructor.*/
-    public ScaleSpriteRenderer(Sprite sprite, int xOffset, int yOffset, int zOffset, boolean fixed, boolean canColorBlend)
+    public ScaleSpriteRenderer(Sprite sprite, int xOffset, int yOffset, boolean fixed, boolean canColorBlend)
     {
         this.sprite = sprite;
         this.offset.set(xOffset, yOffset);
@@ -29,7 +29,7 @@ public class ScaleSpriteRenderer extends SpriteRenderer
 
     /**Default Center Offset Constructor.*/
     public ScaleSpriteRenderer(Sprite sprite, boolean fixed, boolean canColorBlend)
-    {this(sprite, -(sprite.getWidth()/2), -(sprite.getHeight()/2), 0, fixed, canColorBlend);}
+    {this(sprite, -(sprite.getWidth()/2), -(sprite.getHeight()/2), fixed, canColorBlend);}
 
     //Getters
     public float getXScale(){return this.xScale;}

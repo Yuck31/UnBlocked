@@ -159,6 +159,21 @@ public class Functional_FrameAnimation extends Animation
         return frame;
     }
 
+    /**
+     * Applies the Sprite and ofsests of a specific frame.
+     * 
+     * @param frame the frame to use.
+     * @param spriteRenderer the SpriteRenderer to set this animation's current sprite and offset to.
+     */
+    public final void getFrameSprite(int frame, SpriteRenderer spriteRenderer)
+    {
+        //Set Sprite.
+        spriteRenderer.setSprite(sprites[frame]);
+
+        //Set Offsets.
+        spriteRenderer.setOffset(offsets[frame][0], offsets[frame][1]);
+    }
+
 
     //Pivot Getters.
     public final short getOffsetX(){return offsets[timer.getFrame()][0];}
