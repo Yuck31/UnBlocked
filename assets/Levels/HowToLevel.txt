@@ -18,3 +18,7 @@ Entities:
 64-71=
 72-79=
 80-87=
+
+Storing:
+LevelSet/Levels LevelSet/TileSetData
+Level/t.txt Level/e.txt

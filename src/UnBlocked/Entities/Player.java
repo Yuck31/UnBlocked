@@ -39,7 +39,7 @@ public class Player extends Entity
     sprite_drop, sprite_holdDrop;
     private Sprite[] sprite_preDrop = new Sprite[2],
     sprite_preHoldDrop = new Sprite[2];
-    private Sprite sprite_turnAround;
+    private Sprite sprite_turnAround,  sprite_holdTurnAround;
 
     //Animations.
     private Functional_FrameAnimation
@@ -66,7 +66,8 @@ public class Player extends Entity
     anim_idleSleep,
     anim_idleWake,
     anim_idleYawn,
-    anim_pickUp;
+    anim_pickUpBlock,
+    anim_putDownBlock;
     private Functional_FrameAnimation[] anim_run = new Functional_FrameAnimation[2];
     private Functional_FrameAnimation
     anim_spinJump,
@@ -107,7 +108,10 @@ public class Player extends Entity
 
     private boolean neededToTurnAround = false,
     bonking = false;
+    //
     private Block block = null;
+    private boolean holdingBlock = false,
+    puttingAbove = false;
 
     /**Constructor.*/
     public Player(int x, int y)
@@ -180,13 +184,16 @@ public class Player extends Entity
         (
             "Player/player_holdClimb", playerSprites,
             //
-            this::doNothing
+            this::climb_Start,
+            this::climb_Jump,
+            this::climb_Finish
         );
         anim_holdDrop = Functional_FrameAnimation.load
         (
             "Player/player_holdDrop", playerSprites,
             //
-            this::drop
+            this::drop,
+            this::drop//TODO Should only be one function.
         );
         anim_holdFallLand = Functional_FrameAnimation.load
         (
@@ -251,8 +258,18 @@ public class Player extends Entity
         anim_idleSleep,
         anim_idleWake,
         anim_idleYawn,
-        anim_pickUp,
         */
+        anim_pickUpBlock = Functional_FrameAnimation.load
+        (
+            "Player/player_pickUpBlock", playerSprites,
+            this::pickUpBlock
+        );
+        anim_putDownBlock = Functional_FrameAnimation.load
+        (
+            "Player/player_putDownBlock", playerSprites,
+            this::putDownBlock
+        );
+        //
         anim_run[0] = Functional_FrameAnimation.load
         (
             "Player/player_run0", playerSprites,
@@ -279,6 +296,7 @@ public class Player extends Entity
 
         sprite_blink = playerSprites[12];
         sprite_turnAround = playerSprites[133];
+        sprite_holdTurnAround = playerSprites[132];
 
         spriteRenderer = new ScRoSpriteRenderer(anim_idle.getSprite(0), 0, 0,
         1.0f, 1.0f, 0.0f, 8, 8, true, false);
@@ -327,6 +345,25 @@ public class Player extends Entity
         //
         if(!inAnAction)
         {
+            //Block fall check.
+            if(!holdingBlock && block != null)
+            {
+                if(block.fall(timeMod, yVelocity))
+                {
+                    level.setEntityID(block.tileX, block.tileY, (byte)0);
+                    level.setEntityID(block.tileX, Block.targetY, (byte)8);
+                    block.setTileY(Block.targetY);
+                    //
+                    block = null;
+                    yVelocity = 0.0f;
+                }
+                else
+                {
+                    yVelocity += GRAVITY;
+                    return;
+                }
+            }
+
             //Previous command check for animation purposes.
             boolean actionMade = this.currentCommand != CMD_NONE;
 
@@ -366,20 +403,65 @@ public class Player extends Entity
 
                     case CMD_PICKUP:
                     {
-                        /*
-                        //Check tile to the Player's bottom.
-                        boolean tileID = level.isSlid(tileX, tileY+1);
-
-                        //If the tile is not solid, move there.
-                        if(tileID == 0)
+                        int tx = (spriteFlip == Sprite.FLIP_X) ? tileX-1 : tileX+1;
+                        //
+                        if(block == null)
                         {
-                            level.setPlayerPosition(tileX, tileY, tileX, tileY+1);
-                            tileY++;
-                            position.y = tileY << Level.TILE_BITS;
-                        }
-                        */
+                            //Check Entity in front of Player.
+                            Entity e = level.getEntity(tx, tileY);
 
-                        inAnAction = false;
+                            //Is a block there?
+                            if(e instanceof Block)
+                            {
+                                Block b = (Block)e;
+
+                                //Check tiles above the block and player.
+                                boolean sAboveBlock = level.isSolid(tx, tileY-1),
+                                sAbovePlayer = level.isSolid(tileX, tileY-1);
+
+                                if(!sAboveBlock && !sAbovePlayer)
+                                {
+                                    //Set animation.
+                                    currentAction_Anim = anim_pickUpBlock;
+
+                                    //Set Block.
+                                    this.block = b;
+                                    this.block.setTilePosition(tx, tileY);
+                                    level.setEntityID(tx, tileY, (byte)0);
+                                    holdingBlock = true;
+
+                                    //Set idle animation.
+                                    //TODO currentIdle_Anim = anim_holdIdle;
+                                }
+                            }
+                            //Flail?
+                            else{inAnAction = false;}
+                        }
+                        else
+                        {
+                            //Check tiles in the way of the Block.
+                            boolean sFrontBlock = level.isSolid(tx, tileY-1),
+                            sFrontPlayer = level.isSolid(tx, tileY);
+
+                            //Can't put down.
+                            if(sFrontBlock)
+                            {
+                                //TODO Struggle helplessly.
+                                inAnAction = false;
+                            }
+                            //Can put down.
+                            else
+                            {
+                                //Can put above check.
+                                if(sFrontPlayer){puttingAbove = true;}
+                                
+                                //Set idle animation.
+                                currentIdle_Anim = anim_idle;
+
+                                //Set animation.
+                                currentAction_Anim = anim_putDownBlock;
+                            }
+                        }
                     }
                     break;
 
@@ -416,7 +498,7 @@ public class Player extends Entity
         {
             if(speedMul - SPEED_MUL_DEC <= 1.0f){speedMul = 1.0f;}
             else{speedMul -= SPEED_MUL_DEC;}
-            System.out.println(speedMul);
+            //System.out.println(speedMul);
             currentAction_Anim.update(speedMul, spriteRenderer);
             //spriteRenderer.addXOffset(8);
             //spriteRenderer.addYOffset(8);
@@ -457,19 +539,32 @@ public class Player extends Entity
         boolean solid = level.isSolid(tx, tileY);
 
         //Set animation.
-        currentAction_Anim = anim_run[currentFoot];
+        if(holdingBlock){currentAction_Anim = anim_holdRun[currentFoot];}
+        else{currentAction_Anim = anim_run[currentFoot];}
 
         //Set Target Position.
         targetPosition.x = (tx) << Level.TILE_BITS;
 
         //If the tile is solid, bonk into it.
         if(solid){bonking = true;}
-        //Otherwise, if there isn't a floor underneath Target X, fall.
-        else if(!level.isSolid(tx, tileY+1))
+        else
         {
-            falling = FALLING_DROP;
-            speedMul = 3.0f;
+            //TODO If not holding a block, RNG Roll for spin jump.
+
+            if(holdingBlock && level.isSolid(tx, tileY-1))
+            {
+                //TODO Drop block.
+                holdingBlock = false;
+            }
+
+            //If there isn't a floor underneath Target X, fall.
+            if(!level.isSolid(tx, tileY+1))
+            {
+                falling = FALLING_DROP;
+                speedMul = 3.0f;
+            }
         }
+        
     }
 
     private void executeClimb()
@@ -485,7 +580,9 @@ public class Player extends Entity
         if(sFront && !sFrontAbove && !sAbove)
         {
             //Set animation.
-            currentAction_Anim = anim_climb[currentFoot];
+            //if(holdingBlock){currentAction_Anim = anim_holdClimb;}
+            //else
+            {currentAction_Anim = anim_climb[currentFoot];}
 
             //Set Target Position.
             targetPosition.x = tx << Level.TILE_BITS;
@@ -498,7 +595,8 @@ public class Player extends Entity
         else
         {
             //Set animation.
-            currentAction_Anim = anim_hop;
+            if(holdingBlock){currentAction_Anim = anim_holdHop;}
+            else{currentAction_Anim = anim_hop;}
 
             //Set Target Position and yVelocity.
             targetPosition.y = tileY << Level.TILE_BITS;
@@ -585,6 +683,9 @@ public class Player extends Entity
             //Apply initial offset.
             position.x += (spriteFlip == Sprite.FLIP_X) ? -4 : 4;
             position.y -= 8.0f;
+
+            //As well to block.
+            if(holdingBlock){block.setPosition(position.x, position.y - 15.0f);}
         }
 
         //Loop this frame until the player hits the ground.
@@ -599,6 +700,9 @@ public class Player extends Entity
             //Set actual position.
             setTilePosition(tx, tileY-1);
             yVelocity = 0.0f;
+
+            //Set block position.
+            if(holdingBlock){block.setPosition(position.x, position.y - 15.0f);}
 
             //Advance animation.
             currentAction_Anim.setFrame(4);
@@ -624,6 +728,8 @@ public class Player extends Entity
                 }
                 break;
             }
+
+            if(holdingBlock){block.setPosition(position.x, position.y - 15.0f);}
         }
     }
 
@@ -672,7 +778,13 @@ public class Player extends Entity
     public void bonk(float timeMod, byte loopStatus)
     {
         if(currentAction_Anim.getFrame() > 0)
-        {position.x += (spriteFlip == Sprite.FLIP_X) ? BONK_RECOIL_X : -BONK_RECOIL_X;}
+        {
+            //Set player position.
+            position.x += (spriteFlip == Sprite.FLIP_X) ? BONK_RECOIL_X : -BONK_RECOIL_X;
+
+            //Set block position.
+            if(holdingBlock){block.setX(position.x);}
+        }
         //
         if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
         {
@@ -691,14 +803,28 @@ public class Player extends Entity
         {
             if(position.y + yVelocity >= targetPosition.y)
             {
+                //Set level position.
                 level.setPlayerPosition(tileX, tileY, tileX, fallingY);
+
+                //Set player position.
                 setTileY(fallingY);
+
+                //Set block position.
+                if(holdingBlock){block.setY(position.y - 15.0f);}
+
+                //Advance animation.
                 currentAction_Anim.setFrame(1);
             }
             else
             {
+                //SSet position.
                 position.y += yVelocity;
                 yVelocity += GRAVITY;
+
+                //Set block position.
+                if(holdingBlock){block.setY(position.y - 15.0f);}
+
+                //Loop frame.
                 currentAction_Anim.setFrame(0);
             }
         }
@@ -755,6 +881,7 @@ public class Player extends Entity
             //Set actual position.
             setTilePosition(tileX, tileY);
             yVelocity = 0.0f;
+            if(holdingBlock){block.setY(position.y - 15.0f);}
 
             //Get out of this animation.
             inAnAction = false;
@@ -763,6 +890,7 @@ public class Player extends Entity
         {
             position.y += yVelocity;
             yVelocity += GRAVITY;
+            if(holdingBlock){block.setY(position.y - 15.0f);}
         }
     }
 
@@ -771,8 +899,16 @@ public class Player extends Entity
     {
         if(currentAction_Anim.getFrame() < 2 && neededToTurnAround)
         {
-            spriteRenderer.setOffset(-8, -14);
-            spriteRenderer.setSprite(sprite_turnAround);
+            if(holdingBlock)
+            {
+                spriteRenderer.setOffset(-8, -14);
+                spriteRenderer.setSprite(sprite_holdTurnAround);
+            }
+            else
+            {
+                spriteRenderer.setOffset(-8, -14);
+                spriteRenderer.setSprite(sprite_turnAround);
+            }
         }
         //
         if(currentAction_Anim.getFrame() >= 2 && falling == FALLING_DROP)
@@ -788,7 +924,9 @@ public class Player extends Entity
                 {
                     position.x = targetPosition.x + BONK_X;
                     currentAction_Anim.resetAnim();
-                    currentAction_Anim = anim_bonk;
+                    //
+                    if(holdingBlock){currentAction_Anim = anim_holdBonk;}
+                    else{currentAction_Anim = anim_bonk;}
                 }
                 else if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
                 {
@@ -808,11 +946,21 @@ public class Player extends Entity
                     {
                         fallingY = fallCheck(tileX, tileY);
                         targetPosition.y = fallingY << Level.TILE_BITS;
-                        currentAction_Anim = anim_drop;
+                        //
+                        if(holdingBlock){currentAction_Anim = anim_holdDrop;}
+                        else{currentAction_Anim = anim_drop;}
                     }
                 }
-                else if(position.x - (RUN_X * timeMod) > targetPosition.x){position.x -= (RUN_X * timeMod);}
-                else{position.x = targetPosition.x;}
+                else if(position.x - (RUN_X * timeMod) > targetPosition.x)
+                {
+                    position.x -= (RUN_X * timeMod);
+                    if(holdingBlock){block.setX(position.x);}
+                }
+                else
+                {
+                    position.x = targetPosition.x;
+                    if(holdingBlock){block.setX(position.x);}
+                }
             }
             break;
 
@@ -822,7 +970,9 @@ public class Player extends Entity
                 {
                     position.x = targetPosition.x - BONK_X;
                     currentAction_Anim.resetAnim();
-                    currentAction_Anim = anim_bonk;
+                    //
+                    if(holdingBlock){currentAction_Anim = anim_holdBonk;}
+                    else{currentAction_Anim = anim_bonk;}
                 }
                 else if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
                 {
@@ -831,6 +981,8 @@ public class Player extends Entity
 
                     //Set position.
                     setTileX(tileX+1);
+
+                    //Block check.
 
                     currentAction_Anim.resetAnim();
                     neededToTurnAround = false;
@@ -841,21 +993,106 @@ public class Player extends Entity
                     {
                         fallingY = fallCheck(tileX, tileY);
                         targetPosition.y = fallingY << Level.TILE_BITS;
-                        currentAction_Anim = anim_drop;
+                        //
+                        if(holdingBlock){currentAction_Anim = anim_holdDrop;}
+                        else{currentAction_Anim = anim_drop;}
                     }
                 }
-                else if(position.x + (RUN_X * timeMod) < targetPosition.x){position.x += (RUN_X * timeMod);}
-                else{position.x = targetPosition.x;}
+                else if(position.x + (RUN_X * timeMod) < targetPosition.x)
+                {
+                    position.x += (RUN_X * timeMod);
+                    if(holdingBlock){block.setX(position.x);}
+                }
+                else
+                {
+                    position.x = targetPosition.x;
+                    if(holdingBlock){block.setX(position.x);}
+                }
             }
             break;
         }
     }
 
+    private static final float[][] BLOCK_POSITIONS =
+    {
+        {16.0f, 0.0f,},
+        {8.0f, -6.0f,},
+        {0.0f, -18.0f,},
+        {0.0f, -15.0f,},
+    };
+
+    public void pickUpBlock(float timeMod, byte loopStatus)
+    {
+        float bx = BLOCK_POSITIONS[currentAction_Anim.getFrame()][0],
+        by = BLOCK_POSITIONS[currentAction_Anim.getFrame()][1];
+
+        if(holdingBlock)
+        {
+            block.setPosition
+            (
+                position.x + ((spriteFlip == Sprite.FLIP_X) ? -(spriteRenderer.getSprite().getWidth() + bx) : bx),
+                position.y + by
+            );
+        }
+
+        if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
+        {
+            currentAction_Anim.resetAnim();
+            inAnAction = false;
+        }
+    }
+
+    public void putDownBlock(float timeMod, byte loopStatus)
+    {
+        float bx = BLOCK_POSITIONS[3 - currentAction_Anim.getFrame()][0],
+        by = BLOCK_POSITIONS[3 - currentAction_Anim.getFrame()][1];
+
+        if(holdingBlock)
+        {
+            block.setPosition
+            (
+                position.x + ((spriteFlip == Sprite.FLIP_X) ? -(spriteRenderer.getSprite().getWidth() + bx) : bx),
+                position.y + by
+            );
+        }
+
+        if(currentAction_Anim.getFrame() > 1 && puttingAbove)
+        {
+            int tx = (spriteFlip == Sprite.FLIP_X) ? tileX-1 : tileX+1;
+            level.setEntityID(tx, tileY-1, (byte)8);
+            block.setTilePosition(tx, tileY-1);
+
+            puttingAbove = false;
+            holdingBlock = false;
+            block = null;
+            currentAction_Anim.resetAnim();
+            inAnAction = false;
+        }
+        else if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
+        {
+            int tx = (spriteFlip == Sprite.FLIP_X) ? tileX-1 : tileX+1;
+            block.setTilePosition(tx, tileY);
+
+            holdingBlock = false;
+            //
+            if(!level.isSolid(tx, tileY+1))
+            {Block.targetY = fallCheck(tx, tileY+1);}
+            else
+            {
+                level.setEntityID(tx, tileY, (byte)8);
+                block = null;
+            }
+            
+            currentAction_Anim.resetAnim();
+            inAnAction = false;
+        }
+    }
+
     private int fallCheck(int tx, int ty)
     {
-        for(int f = tileY-1; f < level.getHeight(); f++)
+        for(int f = ty; f < level.getHeight(); f++)
         {
-            boolean st = level.isSolid(tileX, f);
+            boolean st = level.isSolid(tx, f);
 
             if(st)
             {

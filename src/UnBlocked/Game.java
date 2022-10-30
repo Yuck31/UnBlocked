@@ -1,8 +1,11 @@
 package UnBlocked;
+import java.io.BufferedInputStream;
 /**
  * 
  */
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -436,6 +439,33 @@ public class Game
         glfwSetCursorPosCallback(windowAddress, mouse::mouseCursorCallback);
         glfwSetScrollCallback(windowAddress, mouse::mouseScrollCallback);
 
+        //Update Controller bindings.
+        byte[] mappingsBytes = null;
+        try
+        {
+            //Load file.
+            File mappingsFile = new File("assets/extraControllerBindings.txt");
+            //Set up the input stream.
+            FileInputStream fis = new FileInputStream(mappingsFile);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+
+            //Read the file's bytes and null-terminate it, gawd diamet GLFW.
+            mappingsBytes = new byte[(int)mappingsFile.length() + 1];
+            bis.read(mappingsBytes);
+            mappingsBytes[mappingsBytes.length-1] = 0;
+ 
+            //Close the input streams.
+            bis.close();
+            fis.close();
+        }
+        catch(FileNotFoundException e){e.printStackTrace();}
+        catch(IOException e){e.printStackTrace();}
+ 
+        ByteBuffer mappingsByte_Buffer = ByteBuffer.allocateDirect(mappingsBytes.length);
+        mappingsByte_Buffer.put(mappingsBytes);
+        mappingsByte_Buffer.rewind();
+        glfwUpdateGamepadMappings(mappingsByte_Buffer);
+         
         //Set Controller Callback
         glfwSetJoystickCallback(controller::controllerCallback);
         controller.checkForControllers();

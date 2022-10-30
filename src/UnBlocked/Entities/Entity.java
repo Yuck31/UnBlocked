@@ -35,6 +35,10 @@ public abstract class Entity implements TileRenderable
     //
     //Position setters.
     //
+    public final void setX(float x){this.position.x = x;}
+    public final void setY(float y){this.position.y = y;}
+    public final void setPosition(float x, float y){this.position.set(x, y);}
+
     public final void setTileX(int tileX)
     {
         this.tileX = tileX;

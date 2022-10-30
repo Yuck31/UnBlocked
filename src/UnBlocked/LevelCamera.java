@@ -52,15 +52,33 @@ public class LevelCamera
             float right = potentialPosition.x + shape.getWidth(),
             levelWidth = level.getWidth() << Level.TILE_BITS;
             
-            if(potentialPosition.x < 0)
+            if(potentialPosition.x < 0.0f)
             {
-                potentialPosition.x = (right > levelWidth) ?
-                (shape.getWidth() - levelWidth) / 2 : 0;
+                potentialPosition.x = 0.0f;
+                if(potentialPosition.x + shape.getWidth() > levelWidth)
+                {potentialPosition.x = -(shape.getWidth() - levelWidth) / 2;}
             }
             else if(right > levelWidth)
             {
-                potentialPosition.x = (potentialPosition.x < 0) ?
-                (shape.getWidth() - levelWidth) / 2 : levelWidth - shape.getWidth();
+                potentialPosition.x = levelWidth - shape.getWidth();
+                if(potentialPosition.x < 0.0f)
+                {potentialPosition.x = -(shape.getWidth() - levelWidth) / 2;}
+            }
+
+            float bottom = potentialPosition.y + shape.getHeight(),
+            levelHeight = level.getHeight() << Level.TILE_BITS;
+            
+            if(potentialPosition.y < 0.0f)
+            {
+                potentialPosition.y = 0.0f;
+                if(potentialPosition.y + shape.getHeight() > levelHeight)
+                {potentialPosition.y = -(shape.getHeight() - levelHeight) / 2;}
+            }
+            else if(bottom > levelHeight)
+            {
+                potentialPosition.y = levelHeight - shape.getHeight();
+                if(potentialPosition.y < 0.0f)
+                {potentialPosition.y = -(shape.getHeight() - levelHeight) / 2;}
             }
 
             //NOW set the actual position.

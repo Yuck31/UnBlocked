@@ -14,7 +14,7 @@ public class Block extends Entity
     //Sprite Renderer.
     private ScaleSpriteRenderer spriteRenderer;
 
-    //private Vector2f targetPosition = new Vector2f();
+    public static int targetY = -1;
 
     /**Constructor.*/
     public Block(int x, int y)
@@ -34,6 +34,13 @@ public class Block extends Entity
     public void update(float timeMod)
     {
 
+    }    
+
+    public boolean fall(float timeMod, float yVelocity)
+    {
+        if(position.y + yVelocity >= Block.targetY << Level.TILE_BITS){return true;}
+        position.y += yVelocity;
+        return false;
     }
 
     @Override

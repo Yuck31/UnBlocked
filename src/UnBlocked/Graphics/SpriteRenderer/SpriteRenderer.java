@@ -26,6 +26,9 @@ public abstract class SpriteRenderer
     //Vector4f representing the color to blend with.
     protected Vector4f blendingColor = new Vector4f();
 
+    /**Gets this SpriteRenderer's Sprite.*/
+    public final Sprite getSprite(){return sprite;}
+
     /**Sets this SpriteRenderer's Sprite.*/
     public final void setSprite(Sprite sprite){this.sprite = sprite;}
 

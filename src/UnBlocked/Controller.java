@@ -104,6 +104,12 @@ public class Controller
         gameKeys[0][3] = GLFW_KEY_D;
         gameKeys[0][4] = GLFW_KEY_F;
 
+        gameButtons[action_UP] = GLFW_GAMEPAD_BUTTON_DPAD_UP;
+        gameButtons[action_LEFT] = GLFW_GAMEPAD_BUTTON_DPAD_LEFT;
+        gameButtons[action_RIGHT] = GLFW_GAMEPAD_BUTTON_DPAD_RIGHT;
+        gameButtons[action_DOWN] = GLFW_GAMEPAD_BUTTON_DPAD_DOWN;
+        gameButtons[action_USE] = GLFW_GAMEPAD_BUTTON_A;
+
         //checkForControllers();
     }
 
@@ -123,10 +129,14 @@ public class Controller
         for(int i = 0; i < MAX_PLAYERS; i++)
         {
             //If a controller is plugged in.
-            if(glfwGetGamepadState(i, controllerStates[i]))
+            if(glfwJoystickPresent(i))
             {
+                //Get controller's input state.
+                glfwGetGamepadState(i, controllerStates[i]);
+
                 //Get Button Hold Inputs
                 buttonHeld[i] = controllerStates[i].buttons();
+                //System.out.println(buttonHeld[i]);
                 ByteBuffer buffer = buttonHeld[i];
 
                 //Get Button Press Inputs
@@ -141,18 +151,17 @@ public class Controller
                 //Get Axes
                 axes[i] = controllerStates[i].axes();
 
-                /*
-                System.out.println("Buttons: " + buttonHeld[i].get(0) + "" + buttonHeld[i].get(1) + ""+ buttonHeld[i].get(2) + "" + buttonHeld[i].get(3)
-                + "" + buttonHeld[i].get(4) + "" + buttonHeld[i].get(5) + "" + buttonHeld[i].get(6) + "" + buttonHeld[i].get(7)
-                + "" + buttonHeld[i].get(8) + "" + buttonHeld[i].get(9) + "" + buttonHeld[i].get(10) + "" + buttonHeld[i].get(11)
-                + "" + buttonHeld[i].get(12) + ""  + buttonHeld[i].get(13) + ""  + buttonHeld[i].get(14));
+                
+                //System.out.println("Buttons: " + buttonHeld[i].get(0) + "" + buttonHeld[i].get(1) + ""+ buttonHeld[i].get(2) + "" + buttonHeld[i].get(3)
+                //+ "" + buttonHeld[i].get(4) + "" + buttonHeld[i].get(5) + "" + buttonHeld[i].get(6) + "" + buttonHeld[i].get(7)
+                //+ "" + buttonHeld[i].get(8) + "" + buttonHeld[i].get(9) + "" + buttonHeld[i].get(10) + "" + buttonHeld[i].get(11)
+                //+ "" + buttonHeld[i].get(12) + ""  + buttonHeld[i].get(13) + ""  + buttonHeld[i].get(14));
 
-                System.out.println("Axes: " + axes[i].get(0) + " " + axes[i].get(1) + " "
-                + axes[i].get(2) + " " + axes[i].get(3) + " "
-                + axes[i].get(4) + " " + axes[i].get(5));
-                */
+                //System.out.println("Axes: " + axes[i].get(0) + " " + axes[i].get(1) + " "
+                //+ axes[i].get(2) + " " + axes[i].get(3) + " "
+                //+ axes[i].get(4) + " " + axes[i].get(5));
+                
             }
-            //else if(i == 0){System.out.println(glfwGetGamepadState(i, controllerStates[i]));}
         }
     }
 

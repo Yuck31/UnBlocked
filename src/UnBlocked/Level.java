@@ -138,6 +138,24 @@ public class Level
         //Update Player and any moving Entities.
         player.update(1.0f);
 
+        //Update camera.
+        camera.update();
+
+        //Update background tile animations.
+        for(int i = 0; i < num_backgroundTiles; i++)
+        {background_TileAnims[i].update(1.0f);}
+
+        //Update playground tile animations.
+        for(int i = 0; i < num_playgroundTiles; i++)
+        {playground_TileAnims[i].update(1.0f);}
+    }
+
+    //This just updates the animations.
+    public void updateAnimations()
+    {
+        //Update camera.
+        camera.update();
+
         //Update background tile animations.
         for(int i = 0; i < num_backgroundTiles; i++)
         {background_TileAnims[i].update(1.0f);}
@@ -278,6 +296,25 @@ public class Level
         {return 0;}
 
         return entities[x + y * width];
+    }
+
+    /**Sets the Entity at the given Tile point.*/
+    public void setEntityID(int x, int y, byte ID)
+    {
+        if(x < 0 || x >= width || y < 0 || y >= height)
+        {return;}
+
+        entities[x + y * width] = ID;
+    }
+
+
+    /**Gets the Entity at the given Tile point.*/
+    public Entity getEntity(int x, int y)
+    {
+        if(x < 0 || x >= width || y < 0 || y >= height)
+        {return Entities.get(0);}
+
+        return Entities.get(entities[x + y * width]);
     }
 
 
