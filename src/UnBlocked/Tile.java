@@ -42,7 +42,7 @@ public class Tile implements TileRenderable
     public void update(float timeMod)
     {
         //Update animation and set Sprite.
-        //spriteRenderer.setSprite(animation.update(timeMod));
+        spriteRenderer.setSprite(animation.update(timeMod));
     }
 
     @Override

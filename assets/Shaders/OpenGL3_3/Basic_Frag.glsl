@@ -45,6 +45,6 @@ void main()
 		//outputColor = vec4(t1, frag_TexCoords.y, 0.0, 1.0);
 
 		//If clear, skip.
-		//if(outputColor.a < 0.01){discard;}
+		if(outputColor.a < 0.01){discard;}
 	//}
 }

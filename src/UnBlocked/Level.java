@@ -5,6 +5,7 @@ package UnBlocked;
  */
 import java.io.File;
 
+import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import UnBlocked.Graphics.Screen;
@@ -47,6 +48,24 @@ public class Level
         byte[] result = new byte[data.length];
         for(int i = 0; i < data.length; i++){result[i] = (byte)data[i];}
         return result;
+    }
+
+    /**Level Editor constructor.*/
+    public Level(int width, int height, Vector2f position)
+    {
+        //Make camera.
+        this.camera = new LevelCamera(this);
+        this.camera.setEntityPosition(position);
+
+        //Set dimensions.
+        this.width = width;
+        this.height = height;
+
+        //Set tiles.
+        this.tiles = new byte[width * height];
+
+        //Set entities.
+        this.entities = new byte[width * height];
     }
 
     /**Test Constructor.*/
@@ -108,6 +127,24 @@ public class Level
     public int getHeight(){return height;}
 
 
+    public void setDimensions(int w, int h)
+    {
+        int oldWidth = width, oldHeight = height;
+        byte[] resultTiles = new byte[w * h],
+        resultEnts = new byte[w * h];
+
+        int xLimit = (w >= oldWidth) ? oldWidth : w,
+        yLimit = (h >= oldHeight) ? oldHeight : h;
+        for(int y = 0; y < yLimit; y++)
+        {
+            for(int x = 0; x < xLimit; x++)
+            {
+                resultTiles[x + y * w] = tiles[x + y * oldWidth];
+                resultEnts[x + y * w] = entities[x + y * oldWidth];
+            }
+        }
+    }
+
     private void initPlayer()
     {
         for(int y = 0; y < height; y++)
@@ -126,6 +163,24 @@ public class Level
 
                     default:
                     break;
+                }
+            }
+        }
+    }
+
+    //Removes an existing player from the map.
+    private void removePlayer()
+    {
+        for(int y = 0; y < height; y++)
+        {
+            for(int x = 0; x < width; x++)
+            {
+                byte entityID = entities[x + y * width];
+
+                if(entityID == 1)
+                {
+                    entities[x + y * width] = 0;
+                    //return;
                 }
             }
         }

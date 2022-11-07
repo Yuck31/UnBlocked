@@ -42,13 +42,16 @@ public class Controller
 
 
     //ID Numbers for all the different actions a key can be bound to
-    public transient static final byte MAX_ACTIONS = 5,
+    public transient static final byte MAX_ACTIONS = 8,
     action_UP = 0,
     action_DOWN = 1,
     action_LEFT = 2,
     action_RIGHT = 3,
     //
-    action_USE = 4;
+    action_SHIFT = 4,
+    action_USE = 5,
+    action_ALT_SHIFT = 6,
+    action_ALT_USE = 7;
 
 
     //Array storing Keyboard Key controls.
@@ -98,17 +101,23 @@ public class Controller
         for(int i = 0; i < controllerStates.length; i++)
         {controllerStates[i] = GLFWGamepadState.calloc();}
 
-        gameKeys[0][0] = GLFW_KEY_W;
-        gameKeys[0][1] = GLFW_KEY_S;
-        gameKeys[0][2] = GLFW_KEY_A;
-        gameKeys[0][3] = GLFW_KEY_D;
-        gameKeys[0][4] = GLFW_KEY_F;
+        gameKeys[0][action_UP] = GLFW_KEY_W;
+        gameKeys[0][action_DOWN] = GLFW_KEY_S;
+        gameKeys[0][action_LEFT] = GLFW_KEY_A;
+        gameKeys[0][action_RIGHT] = GLFW_KEY_D;
+        gameKeys[0][action_SHIFT] = GLFW_KEY_LEFT_SHIFT;
+        gameKeys[0][action_ALT_SHIFT] = GLFW_KEY_LEFT_CONTROL;
+        gameKeys[0][action_USE] = GLFW_KEY_E;
+        gameKeys[0][action_ALT_USE] = GLFW_KEY_F;
 
         gameButtons[action_UP] = GLFW_GAMEPAD_BUTTON_DPAD_UP;
+        gameButtons[action_DOWN] = GLFW_GAMEPAD_BUTTON_DPAD_DOWN;
         gameButtons[action_LEFT] = GLFW_GAMEPAD_BUTTON_DPAD_LEFT;
         gameButtons[action_RIGHT] = GLFW_GAMEPAD_BUTTON_DPAD_RIGHT;
-        gameButtons[action_DOWN] = GLFW_GAMEPAD_BUTTON_DPAD_DOWN;
+        gameButtons[action_SHIFT] = RIGHT_TRIGGER;
+        gameButtons[action_ALT_SHIFT] = LEFT_TRIGGER;
         gameButtons[action_USE] = GLFW_GAMEPAD_BUTTON_A;
+        gameButtons[action_ALT_USE] = GLFW_GAMEPAD_BUTTON_LEFT_BUMPER;
 
         //checkForControllers();
     }
@@ -188,7 +197,7 @@ public class Controller
     /**This is this function GLFW refers to when recieving Keyboard input*/
     public void keyCallback(long window, int key, int scancode, int action, int mods)
     {
-        //If in a Typing Prompt, check for BackSpace and ignore important actions
+        //If in a Typing Prompt, check for BackSpace and ignore important actions.
         if(typingMode != TYPING_NONE)
         {
             if(action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -210,7 +219,7 @@ public class Controller
             return;
         }
 
-        //Otherwise, check important actions
+        //Otherwise, check important actions.
         if(key == GLFW_KEY_UNKNOWN){return;}
         //
         if(action == GLFW_PRESS)

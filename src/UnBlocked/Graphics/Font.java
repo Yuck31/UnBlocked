@@ -78,50 +78,73 @@ public class Font
         catch(FileNotFoundException e){e.printStackTrace();}
         catch(IOException e){e.printStackTrace();}
 
-        //System.out.println("Break.");
-
 
         //Set length of Sprites array.
         sprites = new Sprite[length];
 
         //Use black pixels to split the sheet into multiple Sprites.
-        int currentX = 0;
+        int currentX = 0, currentY = 0, currentHeight = -1;
         for(int i = 0; i < sprites.length; i++)
         {
+            //Get the current row's height.
+            if(currentHeight < 0)
+            {
+                boolean bottom = true;
+                for(int y = currentY; y < sheet.getHeight(); y++)
+                {
+                    if(sheet.getPixel(0, y) == 0xFF000000)
+                    {
+                        currentHeight = (y) - currentY;
+                        bottom = false;
+                        break;
+                    }
+                }
+                if(bottom){currentHeight = (sheet.getHeight()) - currentY;}
+            }
+
             int width = 0, height = 0;
 
+            //Get current sprite's width.
             for(int x = currentX; x < sheet.getWidth(); x++)
             {
-                if(sheet.getPixel(x, 0) == 0xFF000000)
-                {width = x - currentX; break;}
-            }
-            boolean bottom = true;
-            for(int y = 0; y < sheet.getHeight(); y++)
-            {
-                if(sheet.getPixel(currentX, y) == 0xFF000000)
+                if(sheet.getPixel(x, currentY) == 0xFF000000 || x >= sheet.getWidth()-1)
                 {
-                    height = y;
-                    bottom = false;
+                    width = x - currentX;
                     break;
                 }
             }
-            if(bottom){height = sheet.getHeight();}
+            //Get current sprite's height.
+            boolean bottomHeight = true;
+            for(int y = currentY; y < currentY + currentHeight; y++)
+            {
+                if(sheet.getPixel(currentX, y) == 0xFFFF00FF)
+                {
+                    height = y - currentY;
+                    bottomHeight = false;
+                    break;
+                }
+            }
+            if(bottomHeight){height = currentHeight;}
 
-            sprites[i] = new Sprite(sheet, currentX, 0, width, height);
+            //Make sprite.
+            sprites[i] = new Sprite(sheet, currentX, currentY, width, height);
+            System.out.println(i + " " + width + " " + height + " " + currentHeight);
+
+            //Adjust sheet coordinates.
             currentX += (width + 1);
+            if(currentX >= sheet.getWidth()-1)
+            {
+                currentX = 0;
+                currentY += (currentHeight+1);
+                currentHeight = -1;
+            }
 
             //Adjust lineSpace.
             if(height > lineSpace){lineSpace = height;}
-
-            //Add statistic to averageCharHeight.
-            //averageCharHeight += height;
         }
 
         //Add one to lineSpace.
         lineSpace++;
-
-        //Divide averageCharHeight.
-        //averageCharHeight /= sprites.length;
     }
 
     public SpriteSheet getSheet(){return sheet;}

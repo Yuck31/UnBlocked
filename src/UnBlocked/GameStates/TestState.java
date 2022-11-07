@@ -101,20 +101,20 @@ public class TestState extends GameState
 
     //Vector4f color = new Vector4f(1.0f, 0.0f, 0.0f, 1.0f);
 
-    //Font arial = Fonts.get("Arial");
-    //Vector4f c = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-    //float i = 0;
+    Font blockFont0 = Fonts.get("BlockFont0");
+    Vector4f c = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    float i = 0;
 
     public void render(Screen screen)
     {
-        //c.y = Math.abs((float)Math.sin(i += 0.05));
-        //c.z = c.y;
+        c.y = Math.abs((float)Math.sin(i += 0.05));
+        c.z = c.y;
 
         level.render(screen);
         //screen.drawLine(100, 10, 32, (int)player.getX(), (int)player.getY(), (int)player.getZ(), color, true);
 
         //screen.renderSprite(10, 10, testSprite, Sprite.FLIP_NONE, false);
 
-        //arial.render(screen, 100, 280, "gorsh! Does this work?`Only time will tell...", c, false);
+        blockFont0.render(screen, 0, 0, "\"GORSH! Does this work?\"`Only time will tell...", c, false);
     }
 }

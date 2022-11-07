@@ -98,57 +98,11 @@ public class Sprites
                 hashMap.put(fileName, spriteSheet);
             }
 
-            else if(f.getName().contains(".rsf"))//[R]ectangle [S]prite [F]ile
-            {
-                /*
-                try
-                {
-                    //width, height, color
-                    Scanner scanner = new Scanner(f);
-                    String line = scanner.nextLine(), currentString = "";
-                    //0 = Width, 1 = Height, 2 = Color
-                    int[] parameters = new int[3]; int mode = 0;
-
-                    for(int j = 0; j < line.length(); j++)
-                    {
-                        char c = line.charAt(j);
-                        if(c == ',')
-                        {
-                            parameters[mode] = Integer.parseInt(currentString);
-                            mode++;
-                            currentString = "";
-                        }
-                        else if(j >= line.length()-1)
-                        {
-                            parameters[mode] = Integer.parseInt(currentString+c);
-                            mode++;
-                            currentString = "";
-                        }
-                        else{currentString += c;}
-                    }
-                    //Remove ".rsf" from fileName
-                    fileName = fileName.substring(0, fileName.length()-4);
-
-                    //Use the variables to create a SpriteSheet
-                    SpriteSheet spriteSheet = new SpriteSheet(parameters[0], parameters[1], parameters[2]);
-
-                    //Put the SpriteSheet into the hashmap
-                    hashMap.put(fileName, spriteSheet);
-                    
-                    //Close the scanner
-                    scanner.close();
-                }
-                catch(FileNotFoundException e){e.printStackTrace();}
-                */
-            }
-
             else if(f.getName().contains(".dat"))//.dat file. Ignore it.
             {continue;}
 
             else//It's a folder, load everything in it
             {load(f, hashMap, fileName + "/");}
-
-            //System.out.println(fileName);
         }
     }
 
@@ -173,8 +127,8 @@ public class Sprites
         load(new File(imagesPath + "Entities"), global_Entities, "");
 
         //Load Fonts (since Fonts use SpriteSheets, their sheets need to be stored here and be treated as textures too).
-        //load(new File(imagesPath + "Global/Fonts"), global_Fonts, "");
-        //Fonts.load(global_Fonts.values(), global_Fonts.keys());
+        load(new File(imagesPath + "Fonts"), global_Fonts, "");
+        Fonts.load(global_Fonts.values(), global_Fonts.keys());
 
         //NEVER make this function work again.
         loaded = true;

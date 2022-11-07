@@ -13,7 +13,7 @@ public class Fonts
     private Fonts(){}
 
     //Fonts Path.
-    public static final String fontsPath = Sprites.imagesPath + "Global/Fonts/";
+    public static final String fontsPath = Sprites.imagesPath + "Fonts/";
 
     //HashMap.
     private static ConcurrentHashMap<String, Font> fontsHashMap = new ConcurrentHashMap<>();
