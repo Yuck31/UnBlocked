@@ -1435,9 +1435,12 @@ public class OpenGLScreen extends Screen
         //Trig...
         float sin = (float)Math.sin(rads), cos = (float)Math.cos(rads);
 
+        float osX = (xScale * originX);
+        float osY = (yScale * originY);
+
         //Multiply the origin by sin and cos for the actual result origin.
-        float oX = ((originX * cos) + (originY * -sin));
-        float oY = ((originX * sin) + (originY * cos));
+        float orX = ((osX * cos) + (osY * -sin));
+        float orY = ((osX * sin) + (osY * cos));
 
         //Wrap stuff.
         wrapX %= sprite.getWidth();
@@ -1451,17 +1454,17 @@ public class OpenGLScreen extends Screen
         for(int w = 0b00; w <= wrapFlags; w += wrapInc)
         {
             float
-            x0 = xPos + (((0b01 & w) == 0b01) ? ((wx * cos) + (wy * -sin)) : 0) - oX,//((0 * cos) + (0 * -sin)) - oX,
-            y0 = yPos + (((0b10 & w) == 0b10) ? ((wx * sin) + (wy * cos)) : 0) - oY,//((0 * sin) + (0 * cos)) - oY,
+            x0 = xPos + (((0b01 & w) == 0b01) ? ((wx * cos) + (wy * -sin)) : 0) - orX + osX,//((0 * cos) + (0 * -sin)) - oX,
+            y0 = yPos + (((0b10 & w) == 0b10) ? ((wx * sin) + (wy * cos)) : 0) - orY + osY,//((0 * sin) + (0 * cos)) - oY,
             //
-            x1 = xPos + (((0b01 & w) == 0b01) ? ((resultWidth * cos) + (wy * -sin)) : (wx * cos)) - oX,//((wx * cos) + (0 * -sin))) - oX,
-            y1 = yPos + (((0b10 & w) == 0b10) ? ((resultWidth * sin) + (wy * cos)) : (wx * sin)) - oY,//((wx * sin) + (0 * cos))) - oY,
+            x1 = xPos + (((0b01 & w) == 0b01) ? ((resultWidth * cos) + (wy * -sin)) : (wx * cos)) - orX + osX,//((wx * cos) + (0 * -sin))) - oX,
+            y1 = yPos + (((0b10 & w) == 0b10) ? ((resultWidth * sin) + (wy * cos)) : (wx * sin)) - orY + osY,//((wx * sin) + (0 * cos))) - oY,
             //
-            x2 = xPos + (((0b01 & w) == 0b01) ? ((resultWidth * cos) + (resultHeight * -sin)) : ((wx * cos) + (wy * -sin))) - oX,
-            y2 = yPos + (((0b10 & w) == 0b10) ? ((resultWidth * sin) + (resultHeight * cos)) : ((wx * sin) + (wy * cos))) - oY,
+            x2 = xPos + (((0b01 & w) == 0b01) ? ((resultWidth * cos) + (resultHeight * -sin)) : ((wx * cos) + (wy * -sin))) - orX + osX,
+            y2 = yPos + (((0b10 & w) == 0b10) ? ((resultWidth * sin) + (resultHeight * cos)) : ((wx * sin) + (wy * cos))) - orY + osY,
             //
-            x3 = xPos + (((0b01 & w) == 0b01) ? ((wx * cos) + (resultHeight * -sin)) : (wy * -sin)) - oX,//((0 * cos) + (wy * -sin))) - oX,
-            y3 = yPos + (((0b10 & w) == 0b10) ? ((wx * sin) + (resultHeight * cos)) : (wy * cos)) - oY;//((0 * sin) + (wy * cos))) - oY;
+            x3 = xPos + (((0b01 & w) == 0b01) ? ((wx * cos) + (resultHeight * -sin)) : (wy * -sin)) - orX + osX,//((0 * cos) + (wy * -sin))) - oX,
+            y3 = yPos + (((0b10 & w) == 0b10) ? ((wx * sin) + (resultHeight * cos)) : (wy * cos)) - orY + osY;//((0 * sin) + (wy * cos))) - oY;
 
             //Pass the data to a RenderBatch.
             add_basic

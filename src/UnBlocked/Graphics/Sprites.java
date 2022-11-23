@@ -81,28 +81,29 @@ public class Sprites
 
         for(int i = 0; i < files.length; i++)
         {
-            //Get File and FileName
+            //Get File and FileName.
             File f = files[i];
             String fileName = parentDir + f.getName();
 
-            //It's a .png file
+            //It's a .png file.
             if(f.getName().contains(".png"))
             {
-                //Remove ".png" from fileName
+                //Remove ".png" from fileName.
                 fileName = fileName.substring(0, fileName.length()-4);
 
-                //Create new Sprite out of file and increment texID
+                //Create new SpriteSheet out of file and increment texID
                 SpriteSheet spriteSheet = new SpriteSheet(f, fileName);
 
-                //Put the Sprite into the hashmap
+                //Put the Sprite into the hashmap.
                 hashMap.put(fileName, spriteSheet);
             }
 
-            else if(f.getName().contains(".dat"))//.dat file. Ignore it.
+            //.dat/.txt file. Ignore it.
+            else if(f.getName().contains(".dat") || f.getName().contains(".txt"))
             {continue;}
 
-            else//It's a folder, load everything in it
-            {load(f, hashMap, fileName + "/");}
+            //It's a folder, load everything in it.
+            else{load(f, hashMap, fileName + "/");}
         }
     }
 
@@ -222,7 +223,7 @@ public class Sprites
     public static SpriteSheet global_FontSheet(String name){return getSheet(global_Fonts, name);}
 
     //Tiles path.
-    public static final String TILES_PATH = "assets/Images/Tiles/";
+    public static final String TILES_PATH = imagesPath + "Tiles/";
 
     /**Loads a Tile SpriteSheet from the given path.*/
     public static SpriteSheet loadTileSheet(String name)

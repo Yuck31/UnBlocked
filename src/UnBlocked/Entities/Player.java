@@ -55,6 +55,7 @@ public class Player extends Entity
     anim_holdDrop,
     anim_holdFallLand,
     anim_holdHop,
+    anim_holdIdle,
     anim_holdIdleLook;
     private Functional_FrameAnimation[] anim_holdRun = new Functional_FrameAnimation[2];
     private Functional_FrameAnimation
@@ -109,6 +110,7 @@ public class Player extends Entity
     private boolean neededToTurnAround = false,
     bonking = false;
     //
+    private byte blockOffsetX = 0, blockOffsetY = -1;
     private Block block = null;
     private boolean holdingBlock = false,
     puttingAbove = false;
@@ -208,6 +210,11 @@ public class Player extends Entity
             this::hop
         );
         //
+        anim_holdIdle = Functional_FrameAnimation.load
+        (
+            "Player/player_holdIdle", playerSprites,
+            this::idle
+        );
         anim_holdIdleLook = Functional_FrameAnimation.load
         (
             "Player/player_holdIdleLook", playerSprites,
@@ -299,7 +306,7 @@ public class Player extends Entity
         sprite_holdTurnAround = playerSprites[132];
 
         spriteRenderer = new ScRoSpriteRenderer(anim_idle.getSprite(0), 0, 0,
-        1.0f, 1.0f, 0.0f, 8, 8, true, false);
+        1.0f, 1.0f, 0.0f, 5, 10, true, false);
 
         currentIdle_Anim = anim_idle;
     }
@@ -307,6 +314,9 @@ public class Player extends Entity
     
     @Override
     public boolean isSolid(){return false;}
+
+    public byte getBlockOffsetX(){return blockOffsetX;}
+    public byte getBlockOffsetY(){return blockOffsetY;}
 
 
     private static final float SPEED_MUL_DEC = 0.315f;
@@ -431,7 +441,7 @@ public class Player extends Entity
                                     holdingBlock = true;
 
                                     //Set idle animation.
-                                    //TODO currentIdle_Anim = anim_holdIdle;
+                                    currentIdle_Anim = anim_holdIdle;
                                 }
                             }
                             //Flail?
@@ -540,7 +550,17 @@ public class Player extends Entity
 
         //Set animation.
         if(holdingBlock){currentAction_Anim = anim_holdRun[currentFoot];}
-        else{currentAction_Anim = anim_run[currentFoot];}
+        else
+        {
+            //TODO If not holding a block, RNG Roll for spin jump.
+            int r = Game.RANDOM.nextInt(8);
+            if(r == 0)
+            {
+                //System.out.println("SPEEN");
+                currentAction_Anim = anim_run[currentFoot];
+            }
+            else{currentAction_Anim = anim_run[currentFoot];}
+        }
 
         //Set Target Position.
         targetPosition.x = (tx) << Level.TILE_BITS;
@@ -549,8 +569,6 @@ public class Player extends Entity
         if(solid){bonking = true;}
         else
         {
-            //TODO If not holding a block, RNG Roll for spin jump.
-
             if(holdingBlock && level.isSolid(tx, tileY-1))
             {
                 //TODO Drop block.
@@ -817,7 +835,7 @@ public class Player extends Entity
             }
             else
             {
-                //SSet position.
+                //Set position.
                 position.y += yVelocity;
                 yVelocity += GRAVITY;
 
@@ -1013,18 +1031,20 @@ public class Player extends Entity
         }
     }
 
-    private static final float[][] BLOCK_POSITIONS =
+    private static final float[][] PICKUP_BLOCK_POSITIONS =
     {
         {16.0f, 0.0f,},
         {8.0f, -6.0f,},
         {0.0f, -18.0f,},
-        {0.0f, -15.0f,},
+        {0.0f, -14.0f,},
     };
+
+    int oldBlockTX = -1, oldBlockTY = -1;
 
     public void pickUpBlock(float timeMod, byte loopStatus)
     {
-        float bx = BLOCK_POSITIONS[currentAction_Anim.getFrame()][0],
-        by = BLOCK_POSITIONS[currentAction_Anim.getFrame()][1];
+        float bx = PICKUP_BLOCK_POSITIONS[currentAction_Anim.getFrame()][0],
+        by = PICKUP_BLOCK_POSITIONS[currentAction_Anim.getFrame()][1];
 
         if(holdingBlock)
         {
@@ -1033,10 +1053,20 @@ public class Player extends Entity
                 position.x + ((spriteFlip == Sprite.FLIP_X) ? -(spriteRenderer.getSprite().getWidth() + bx) : bx),
                 position.y + by
             );
+
+            blockOffsetX = (byte)(((int)bx >> Level.TILE_BITS));
+            blockOffsetY = (byte)(((int)by >> Level.TILE_BITS));
         }
 
         if(loopStatus == FrameAnimation_Timer.HAS_ENDED)
         {
+            blockOffsetX = 0;
+            blockOffsetY = -1;
+            //
+            block.setX(position.x);
+            block.setY(position.y - 15.0f);
+            //
+            currentIdle_Anim = anim_holdIdle;
             currentAction_Anim.resetAnim();
             inAnAction = false;
         }
@@ -1044,8 +1074,8 @@ public class Player extends Entity
 
     public void putDownBlock(float timeMod, byte loopStatus)
     {
-        float bx = BLOCK_POSITIONS[3 - currentAction_Anim.getFrame()][0],
-        by = BLOCK_POSITIONS[3 - currentAction_Anim.getFrame()][1];
+        float bx = PICKUP_BLOCK_POSITIONS[3 - currentAction_Anim.getFrame()][0],
+        by = PICKUP_BLOCK_POSITIONS[3 - currentAction_Anim.getFrame()][1];
 
         if(holdingBlock)
         {
@@ -1054,6 +1084,9 @@ public class Player extends Entity
                 position.x + ((spriteFlip == Sprite.FLIP_X) ? -(spriteRenderer.getSprite().getWidth() + bx) : bx),
                 position.y + by
             );
+
+            blockOffsetX = (byte)(((int)bx >> Level.TILE_BITS));
+            blockOffsetY = (byte)(((int)by >> Level.TILE_BITS));
         }
 
         if(currentAction_Anim.getFrame() > 1 && puttingAbove)
@@ -1065,6 +1098,8 @@ public class Player extends Entity
             puttingAbove = false;
             holdingBlock = false;
             block = null;
+            //
+            currentIdle_Anim = anim_idle;
             currentAction_Anim.resetAnim();
             inAnAction = false;
         }
@@ -1075,6 +1110,9 @@ public class Player extends Entity
 
             holdingBlock = false;
             //
+            blockOffsetX = 0;
+            blockOffsetY = -1;
+            //
             if(!level.isSolid(tx, tileY+1))
             {Block.targetY = fallCheck(tx, tileY+1);}
             else
@@ -1082,7 +1120,8 @@ public class Player extends Entity
                 level.setEntityID(tx, tileY, (byte)8);
                 block = null;
             }
-            
+            //
+            currentIdle_Anim = anim_idle;
             currentAction_Anim.resetAnim();
             inAnAction = false;
         }
@@ -1114,10 +1153,11 @@ public class Player extends Entity
         screen.fillRect(tileX << Level.TILE_BITS, tileY << Level.TILE_BITS, Level.TILE_SIZE, Level.TILE_SIZE, color, true);
 
         //Set visual position.
-        visualPosition.x = position.x+16;
-        visualPosition.y = position.y+16;
+        visualPosition.x = position.x+9;
+        visualPosition.y = position.y+8;
 
         //Render main sprite.
+        //spriteRenderer.setOffset(0, 0);
         spriteRenderer.render(screen, visualPosition, scale);
 
         //If blinking, render blink.
@@ -1139,6 +1179,12 @@ public class Player extends Entity
 
     public void renderBlock(Screen screen, float scale)
     {
-        if(block != null){block.render(screen, scale);}
+        if(block != null)
+        {
+            //Render Block.
+            block.render(screen, scale);
+
+            //TODO Render front arm.
+        }
     }
 }

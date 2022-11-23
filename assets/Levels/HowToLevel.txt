@@ -3,6 +3,9 @@ Tiles:
 0-f 0-f
 allowing 16 background and 16 playground tiles in one set.
 
+Initial Byte:
+[][player direction]
+
 Entities:
 0=nothing
 1=player

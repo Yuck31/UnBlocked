@@ -168,7 +168,7 @@ public class Level
         }
     }
 
-    //Removes an existing player from the map.
+    /**Removes an existing player from the map.*/
     private void removePlayer()
     {
         for(int y = 0; y < height; y++)
@@ -283,10 +283,10 @@ public class Level
             {
                 //Get Entity ID.
                 int entityID = getEntityID_Unsafe(x, y),
-                entityBelow = getEntityID(x, y+1);
+                blockToPlayerCheck = getEntityID(x-player.getBlockOffsetX(), y-player.getBlockOffsetY());
 
                 //Player's block check.
-                if(entityBelow == 1){player.renderBlock(screen, scale);}
+                if(blockToPlayerCheck == 1){player.renderBlock(screen, scale);}
                 else
                 {
                     //Tile render
@@ -339,6 +339,25 @@ public class Level
         return (((tiles[x + y * width] & 0xF0) >> 4) & 0xFF) > 0
         || Entities.get(entities[x + y * width]).isSolid();
     }
+
+    /**Sets a Playground tile at the given coordinate.*/
+    public void setPlaygroundTile(int x, int y, byte tileID)
+    {
+        if(x < 0 || x >= width || y < 0 || y >= height){return;}
+
+        byte value = tiles[x + y * width];
+        tiles[x + y * width] = (byte)((tileID << 4) | (value & 0x0F));
+    }
+
+    /**Sets a Background tile at the given coordinate.*/
+    public void setBackgroundTile(int x, int y, byte tileID)
+    {
+        if(x < 0 || x >= width || y < 0 || y >= height){return;}
+
+        byte value = tiles[x + y * width];
+        tiles[x + y * width] = (byte)((value & 0xF0) | tileID);
+    }
+
 
 
     /**Gets the Entity ID at the given Tile point without doing an out-of-bounds check.*/

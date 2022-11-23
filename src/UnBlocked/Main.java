@@ -12,6 +12,7 @@ public class Main
     {
         Game game = Game.instantiate(Game.SCREEN_WIDTH, Game.SCREEN_HEIGHT);
         game.start(new UnBlocked.GameStates.TestState());
+        //game.start(new UnBlocked.GameStates.LevelEditorState());
         //game.start();
     }
 }

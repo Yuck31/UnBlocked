@@ -17,20 +17,20 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Controller
 {
-    //Array of booleans tracking which keys are pressed
+    //Array of booleans tracking which keys are pressed.
     private final boolean[] keyHeld = new boolean[350],
     keyPressed = new boolean[keyHeld.length];
 
     public static final byte MAX_PLAYERS = 4;
     private final String[] controllerPresent = new String[MAX_PLAYERS];
 
-    //Two Custom Buttons for Triggers
+    //Two Custom Buttons for Triggers.
     public static final int LEFT_TRIGGER = GLFW_GAMEPAD_BUTTON_LAST+1,
     RIGHT_TRIGGER = GLFW_GAMEPAD_BUTTON_LAST+2;
 
 
     //IDs for Menu Actions.
-    public static final int MAX_MENU_ACTIONS = 7,
+    public static final int MAX_MENU_ACTIONS = 11,
     menu_UP = 0,
     menu_DOWN = 1,
     menu_LEFT = 2,
@@ -38,7 +38,12 @@ public class Controller
     //
     menu_CONFIRM = 4,
     menu_CANCEL = 5,
-    menu_SPECIAL = 6;
+    menu_SPECIAL = 6,
+    menu_LEFT_TAB = 7,
+    menu_RIGHT_TAB = 8,
+    //
+    menu_ALT_CONFIRM = 9,
+    menu_ALT_CANCEL = 10;
 
 
     //ID Numbers for all the different actions a key can be bound to
@@ -50,6 +55,7 @@ public class Controller
     //
     action_SHIFT = 4,
     action_USE = 5,
+    //
     action_ALT_SHIFT = 6,
     action_ALT_USE = 7;
 
@@ -67,7 +73,7 @@ public class Controller
         //Player 1/5
         {
             GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D,
-            GLFW_KEY_F, GLFW_KEY_G, GLFW_KEY_Q
+            GLFW_KEY_F, GLFW_KEY_G, GLFW_KEY_R, GLFW_KEY_Q, GLFW_KEY_E
         },
         //Player 2/6
         {
@@ -131,9 +137,23 @@ public class Controller
     //Axes
     private FloatBuffer[] axes = new FloatBuffer[MAX_PLAYERS];
 
+    //Menu stuff.
+    private boolean menuHold = false;
+    public static final byte MENU_REPEAT = 4, MENU_HOLD_START_TIME = -12 + MENU_REPEAT;
+    private byte menuHoldTime = MENU_HOLD_START_TIME;
+
     /**Checks for Button and Axes input*/
     public void update()
     {
+        //Menu repeat.
+        if(menuHold)
+        {
+            menuHoldTime++;
+            if(menuHoldTime > MENU_REPEAT){menuHoldTime = 1;}
+            menuHold = false;
+        }
+        else{menuHoldTime = MENU_HOLD_START_TIME;}
+
         //for(int i = 0; i < 1; i++)
         for(int i = 0; i < MAX_PLAYERS; i++)
         {
@@ -455,10 +475,14 @@ public class Controller
      * @param action is the action to check. Use menu_X.
      * @return true if an input assciated with the given action is held down.
      */
-    public boolean menu_InputHeld(int playerNum, int action)
+    public boolean menu_InputHeld(int playerNum, int action, boolean repeat)
     {
+        boolean result = false;
+
+        //Controller.
         if(glfwJoystickPresent(playerNum))
         {
+            //Get button that needs to be pressed.
             int button = menu_Buttons[action];
 
             boolean dPad = false;
@@ -466,34 +490,71 @@ public class Controller
             switch(action)
             {
                 case menu_UP:
-                dPad = buttonHeld(playerNum, button);
-                axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_Y);
-                if(axes < -deadZone || dPad){return true;}
+                {
+                    dPad = buttonHeld(playerNum, button);
+                    axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_Y);
+                    if(axes < -deadZone || dPad){result = true;}
+                }
                 break;
 
                 case menu_DOWN:
-                dPad = buttonHeld(playerNum, button);
-                axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_Y);
-                if(axes > deadZone || dPad){return true;}
+                {
+                    dPad = buttonHeld(playerNum, button);
+                    axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_Y);
+                    if(axes > deadZone || dPad){result = true;}
+                }
                 break;
 
                 case menu_LEFT:
-                dPad = buttonHeld(playerNum, button);
-                axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_X);
-                if(axes < -deadZone || dPad){return true;}
+                {
+                    dPad = buttonHeld(playerNum, button);
+                    axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_X);
+                    if(axes < -deadZone || dPad){result = true;}
+                }
                 break;
 
                 case menu_RIGHT:
-                dPad = buttonHeld(playerNum, button);
-                axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_X);
-                if(axes > deadZone || dPad){return true;}
+                {
+                    dPad = buttonHeld(playerNum, button);
+                    axes = getAxes(playerNum, GLFW_GAMEPAD_AXIS_LEFT_X);
+                    if(axes > deadZone || dPad){result = true;}
+                }
                 break;
 
-                default: return buttonHeld(playerNum, button);
+                default:
+                {
+                    if(action >= menu_LEFT_TAB && action <= menu_RIGHT_TAB)
+                    {result = buttonHeld(playerNum, button);}
+                    //
+                    else{return buttonHeld(playerNum, button);}
+                }
+                break;
             }
         }
-        return isKeyHeld(menu_Keys[playerNum % 4][action]);
+        //Keyboard.
+        else
+        {
+            if((action >= menu_UP && action <= menu_RIGHT)
+            || (action >= menu_LEFT_TAB && action <= menu_RIGHT_TAB))
+            {result = isKeyHeld(menu_Keys[playerNum % 4][action]);}
+            //
+            else{return isKeyHeld(menu_Keys[playerNum % 4][action]);}
+        }
+
+        //Menu repeat.
+        if(repeat && result)
+        {
+            menuHold = true;
+            //
+            if(!(menuHoldTime == MENU_REPEAT
+            || menuHoldTime == MENU_HOLD_START_TIME))
+            {return false;}
+        }
+        return result;
     }
+
+    public boolean menu_InputHeld(int playerNum, int action)
+    {return this.menu_InputHeld(playerNum, action, true);}
 
     /**
      * Input Pressed Method for Menus.

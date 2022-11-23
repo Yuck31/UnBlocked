@@ -102,10 +102,12 @@ public class ScRoSpriteRenderer extends SpriteRenderer
             (int)((y + offset.y) * scaleOffset),
             sprite, flip, 0, 0,
             xs, ys,
-            rads, (int)(origin.x * xScale), (int)(origin.y * yScale),
+            rads, (int)origin.x, (int)origin.y,
             fixed
         );
 
+        //origin.x = (origin.x + 0.1f) % 10.0f;
+        //origin.y = (origin.y + 0.1f) % 10.0f;
         //addRads(0.01f);
     }
 

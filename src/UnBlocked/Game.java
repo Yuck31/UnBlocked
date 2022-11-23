@@ -259,9 +259,13 @@ public class Game
             audioManager = new AudioManager(updateWindowAddress);
             AudioManager.init();
 
+            //System.out.println("Start");
+
             //Set Graphics API load function and load the Global SpriteSheets if that hasn't already happened.
             Sprites.setSheetFunctions();
-            Sprites.loadGlobalSheets();            
+            Sprites.loadGlobalSheets();
+
+            //System.out.println("End");        
 
             //Start the GameStateManager.
             gameStateManager.start(this, state);

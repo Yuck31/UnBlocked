@@ -82,6 +82,10 @@ public class Font
         //Set length of Sprites array.
         sprites = new Sprite[length];
 
+        //Get the sheet's pixel data.
+        int[] sheet_pixels = sheet.getPixels();
+        //System.out.println("Start");
+
         //Use black pixels to split the sheet into multiple Sprites.
         int currentX = 0, currentY = 0, currentHeight = -1;
         for(int i = 0; i < sprites.length; i++)
@@ -92,7 +96,8 @@ public class Font
                 boolean bottom = true;
                 for(int y = currentY; y < sheet.getHeight(); y++)
                 {
-                    if(sheet.getPixel(0, y) == 0xFF000000)
+                    //System.out.println(currentX + " " + y + " " + sheet_pixels[0 + y * sheet.getWidth()]);
+                    if(sheet_pixels[0 + y * sheet.getWidth()] == 0xFF000000)
                     {
                         currentHeight = (y) - currentY;
                         bottom = false;
@@ -107,7 +112,8 @@ public class Font
             //Get current sprite's width.
             for(int x = currentX; x < sheet.getWidth(); x++)
             {
-                if(sheet.getPixel(x, currentY) == 0xFF000000 || x >= sheet.getWidth()-1)
+                //System.out.println(currentY);
+                if(sheet_pixels[x + currentY * sheet.getWidth()] == 0xFF000000 || x >= sheet.getWidth()-1)
                 {
                     width = x - currentX;
                     break;
@@ -117,7 +123,7 @@ public class Font
             boolean bottomHeight = true;
             for(int y = currentY; y < currentY + currentHeight; y++)
             {
-                if(sheet.getPixel(currentX, y) == 0xFFFF00FF)
+                if(sheet_pixels[currentX + y * sheet.getWidth()] == 0xFFFF00FF)
                 {
                     height = y - currentY;
                     bottomHeight = false;
@@ -128,7 +134,7 @@ public class Font
 
             //Make sprite.
             sprites[i] = new Sprite(sheet, currentX, currentY, width, height);
-            System.out.println(i + " " + width + " " + height + " " + currentHeight);
+            //System.out.println(i + " " + width + " " + height + " " + currentHeight);
 
             //Adjust sheet coordinates.
             currentX += (width + 1);
@@ -142,6 +148,7 @@ public class Font
             //Adjust lineSpace.
             if(height > lineSpace){lineSpace = height;}
         }
+        //System.out.println("End");
 
         //Add one to lineSpace.
         lineSpace++;

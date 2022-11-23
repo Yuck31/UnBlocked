@@ -242,7 +242,24 @@ public class SpriteSheet
     //Pixel Getters.
     public int getPixel(int x, int y){return pixels[(x % width) + (y % height) * width];}
     public int getPixel(int i){return pixels[i];}
-    public int[] getPixels(){return pixels;}
+    public int[] getPixels()
+    {
+        //return pixels;
+
+        if(pixels == null)
+        {
+            //System.out.println("Start");
+            //Bind texture.
+            GL33.glBindTexture(GL33.GL_TEXTURE_2D, ID);
+
+            //Get pixels.
+            int[] result = new int[width * height];
+            GL33.glGetTexImage(GL33.GL_TEXTURE_2D, 0, GL33.GL_BGRA, GL33.GL_UNSIGNED_INT_8_8_8_8_REV, result);
+            //System.out.println("End");
+            return result;
+        }
+        return pixels;
+    }
 
     public int getID(){return ID;}
     //public String getName(){return name;}
