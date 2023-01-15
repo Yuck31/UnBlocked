@@ -194,8 +194,7 @@ public class Player extends Entity
         (
             "Player/player_holdDrop", playerSprites,
             //
-            this::drop,
-            this::drop//TODO Should only be one function.
+            this::drop
         );
         anim_holdFallLand = Functional_FrameAnimation.load
         (
@@ -782,14 +781,14 @@ public class Player extends Entity
 
     public void idle(float timeMod, byte loopStatus)
     {
-        blinkX = (byte)((spriteFlip == Sprite.FLIP_X) ? -14 : -6);
-        blinkY = -17;
+        blinkX = (byte)((spriteFlip == Sprite.FLIP_X) ? -6 : 2);
+        blinkY = -9;
     }
 
     public void idle_breathe(float timeMod, byte loopStatus)
     {
-        blinkX = (byte)((spriteFlip == Sprite.FLIP_X) ? -14 : -6);
-        blinkY = -16;
+        blinkX = (byte)((spriteFlip == Sprite.FLIP_X) ? -6 : 2);
+        blinkY = -8;
     }
 
     private static final float BONK_RECOIL_X = 0.5f;
@@ -965,7 +964,11 @@ public class Player extends Entity
                         fallingY = fallCheck(tileX, tileY);
                         targetPosition.y = fallingY << Level.TILE_BITS;
                         //
-                        if(holdingBlock){currentAction_Anim = anim_holdDrop;}
+                        if(holdingBlock)
+                        {
+                            block.setX(position.x);
+                            currentAction_Anim = anim_holdDrop;
+                        }
                         else{currentAction_Anim = anim_drop;}
                     }
                 }
@@ -1034,7 +1037,7 @@ public class Player extends Entity
     private static final float[][] PICKUP_BLOCK_POSITIONS =
     {
         {16.0f, 0.0f,},
-        {8.0f, -6.0f,},
+        {12.0f, -6.0f,},
         {0.0f, -18.0f,},
         {0.0f, -14.0f,},
     };
@@ -1043,14 +1046,16 @@ public class Player extends Entity
 
     public void pickUpBlock(float timeMod, byte loopStatus)
     {
-        float bx = PICKUP_BLOCK_POSITIONS[currentAction_Anim.getFrame()][0],
+        float bx = (spriteFlip == Sprite.FLIP_X) ? -PICKUP_BLOCK_POSITIONS[currentAction_Anim.getFrame()][0]
+        : PICKUP_BLOCK_POSITIONS[currentAction_Anim.getFrame()][0],
+        //
         by = PICKUP_BLOCK_POSITIONS[currentAction_Anim.getFrame()][1];
 
         if(holdingBlock)
         {
             block.setPosition
             (
-                position.x + ((spriteFlip == Sprite.FLIP_X) ? -(spriteRenderer.getSprite().getWidth() + bx) : bx),
+                position.x + bx,
                 position.y + by
             );
 
@@ -1074,14 +1079,16 @@ public class Player extends Entity
 
     public void putDownBlock(float timeMod, byte loopStatus)
     {
-        float bx = PICKUP_BLOCK_POSITIONS[3 - currentAction_Anim.getFrame()][0],
+        float bx = (spriteFlip == Sprite.FLIP_X) ? -PICKUP_BLOCK_POSITIONS[3 - currentAction_Anim.getFrame()][0]
+        : PICKUP_BLOCK_POSITIONS[3 - currentAction_Anim.getFrame()][0],
+        //
         by = PICKUP_BLOCK_POSITIONS[3 - currentAction_Anim.getFrame()][1];
 
         if(holdingBlock)
         {
             block.setPosition
             (
-                position.x + ((spriteFlip == Sprite.FLIP_X) ? -(spriteRenderer.getSprite().getWidth() + bx) : bx),
+                position.x + bx,
                 position.y + by
             );
 
@@ -1153,7 +1160,7 @@ public class Player extends Entity
         screen.fillRect(tileX << Level.TILE_BITS, tileY << Level.TILE_BITS, Level.TILE_SIZE, Level.TILE_SIZE, color, true);
 
         //Set visual position.
-        visualPosition.x = position.x+9;
+        visualPosition.x = position.x + 8;//(((spriteFlip & Sprite.FLIP_X) == 1) ? 10 : 8);
         visualPosition.y = position.y+8;
 
         //Render main sprite.
